@@ -120,6 +120,7 @@ int main(int, char**)
 
     /////////////////// create log reader
     LogReader reader("../raw/Log-20190902-175620 Segment.csv");
+    LogRender render(reader);
     /////////////////// 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -136,13 +137,10 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        render.DrawDataBox();
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
-
-        ImGui::Begin("LogReader Debug");
-        ImGui::Text("%s\n", reader.GetDebugStr().c_str());
-        ImGui::End();
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         //{
