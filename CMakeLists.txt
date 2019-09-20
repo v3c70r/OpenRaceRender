@@ -53,6 +53,10 @@ add_library(imgui
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 
-add_executable(main src/main.cpp src/logreader.cpp)
+add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp)
 target_link_libraries(main imgui glfw gl3w)
+
+enable_testing()
+add_executable(logtest src/test.cpp src/logreader.cpp)
+add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-175620 Segment.csv")
     
