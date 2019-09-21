@@ -1,7 +1,24 @@
 #include "logreader.h"
 #include <sstream>
+#include <limits>
+
+bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
+{
+    return thisRec.timestamp < other.timestamp;
+}
+bool operator<(const RaceRecord& thisRec,
+                           const float& otherTimestamp)
+{
+    return thisRec.timestamp < otherTimestamp;
+}
+
+//////////////////////////////////////////////////////
+
+
 
 LogReader::LogReader(const std::string& fileName)
+    : m_fMinTimeStamp(std::numeric_limits<float>::max()),
+      m_fMaxTimeStamp(std::numeric_limits<float>::min())
 {
     std::ifstream recordFile(fileName);
     std::string line;
@@ -27,6 +44,9 @@ LogReader::LogReader(const std::string& fileName)
                 if (line.size() > 0) 
                 {
                     std::vector<float> rec = SplitFloats(line);
+                    const float& timestamp = rec[0];
+                    m_fMinTimeStamp = timestamp < m_fMinTimeStamp ? timestamp : m_fMinTimeStamp;
+                    m_fMaxTimeStamp = timestamp > m_fMaxTimeStamp ? timestamp : m_fMaxTimeStamp;
                     m_vRecords.emplace_back(rec[0], rec);
                 }
             }
@@ -55,6 +75,26 @@ std::string LogReader::GetDebugStr() const
     }
     return ss.str();
 }
+
+RaceRecord LogReader::GetInterpolatedRecord(float timestamp) const
+{
+
+    // TODO: Handle interpolation
+    //auto source = std::lower_bound(m_vRecords.begin(), m_vRecords.end(), timestamp);
+    //auto target = source++;
+    return RaceRecord(timestamp, std::vector<float>());
+}
+
+const RaceRecord& LogReader::GetLowerBoundRecord(float timestamp) const
+{
+    if (timestamp > m_fMaxTimeStamp || timestamp < m_fMinTimeStamp)
+        return *m_vRecords.begin();
+
+    auto it = std::lower_bound(m_vRecords.begin(), m_vRecords.end(), timestamp);
+    return *it;
+}
+
+//////////////////////////////////////////////////////////
 
 std::vector<std::string> LogReader::SplitString(const std::string& input, char delimiter)
 {

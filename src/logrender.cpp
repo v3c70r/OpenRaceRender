@@ -1,6 +1,12 @@
 #include "logrender.h"
 #include "logreader.h"
 #include "imgui.h"
+
+LogRender::LogRender(const LogReader& LogReader)
+    : m_logReader(LogReader), m_fTime(m_logReader.GetMinTimeStamp())
+{
+}
+
 void LogRender::DrawHeaderBox()
 {
     ImGui::Begin("Header Picker");
@@ -16,6 +22,16 @@ void LogRender::DrawDataBox()
 
     static int item_current = 0;
     ImGui::Combo("", &item_current, cheaders.data(), strHeaders.size());
+    const RaceRecord& rec = m_logReader.GetLowerBoundRecord(m_fTime);
+    ImGui::Text("%f\n", rec.values[item_current]);
     ImGui::End();
 }
+
+void LogRender::DrawTimeSlider()
+{
+    ImGui::Begin("TimeSlider");
+    ImGui::SliderFloat("", &m_fTime, m_logReader.GetMinTimeStamp(), m_logReader.GetMaxTimeStamp(), "%.2f");
+    ImGui::End();
+
+};
 
