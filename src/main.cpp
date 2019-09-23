@@ -139,6 +139,7 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ////////////////////////////////
+        ImGui::Text("%s\n", reader.GetDebugStr().c_str());
         render.DrawDataBox();
         render.DrawTimeSlider();
         //////////////////////////////

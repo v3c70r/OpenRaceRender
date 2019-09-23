@@ -8,6 +8,8 @@ public:
     void DrawHeaderBox();
     void DrawDataBox();
     void DrawTimeSlider();
+    void DrawRevBox();
+    void DrawThrottleBrakeBox();
 
 private:
     const LogReader& m_logReader;
