@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
 
+
 #include "logreader.h"
 #include "logrender.h"
 
@@ -38,7 +39,7 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -120,7 +121,18 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     /////////////////// create log reader
-    LogReader reader("../raw/Log-20190902-175620 Segment.csv");
+    std::string fileName;
+    if (argc == 2)
+    {
+        fileName = argv[1];
+    }
+    //if (fileName.ex
+    else
+    {
+        // TODO: File dialog
+        fileName = "../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.csv";
+    }
+    LogReader reader(fileName);
     LogRender render(reader);
     /////////////////// 
     // Main loop
@@ -139,9 +151,10 @@ int main(int, char**)
         ImGui::NewFrame();
 
         ////////////////////////////////
-        ImGui::Text("%s\n", reader.GetDebugStr().c_str());
+        //ImGui::Text("%s\n", reader.GetDebugStr().c_str());
         render.DrawDataBox();
         render.DrawTimeSlider();
+        render.DrawThrottleBrakeBox();
         //////////////////////////////
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

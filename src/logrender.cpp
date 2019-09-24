@@ -22,16 +22,26 @@ void LogRender::DrawDataBox()
 
     static int item_current = 0;
     ImGui::Combo("", &item_current, cheaders.data(), strHeaders.size());
+    ImGui::Text("Selection index %d", item_current);
     //const RaceRecord& rec = m_logReader.GetLowerBoundRecord(m_fTime);
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
     ImGui::Text("%f\n", rec.values[item_current]);
     ImGui::End();
 }
 
-
 void LogRender::DrawThrottleBrakeBox()
 {
+    const size_t ENGINE_SPEED_IDX = 21;
+    //const size_t BRAKE_IDX = 17;
+    const size_t THROTTLE_POS_INDEX = 23;
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
+
+    float progress = rec.values[THROTTLE_POS_INDEX] / 100.0;
+    ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+
+    progress = rec.values[ENGINE_SPEED_IDX] / 9500.0;
+    //sprintf("%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500);
+    ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 }
 
 void LogRender::DrawTimeSlider()
