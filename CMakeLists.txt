@@ -49,6 +49,7 @@ add_library(imgui
     thirdparty/imgui/imgui_widgets.cpp
     thirdparty/imgui/imgui_impl_opengl3.cpp
     thirdparty/imgui/imgui_impl_glfw.cpp
+    #thirdparty/imgui/filedialog/filedialog.cc
     )
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)

@@ -44,6 +44,20 @@ void LogRender::DrawThrottleBrakeBox()
     ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 }
 
+void DrawLapTime()
+{
+}
+
+void LogRender::DrawSpeedBox()
+{
+    RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
+    const size_t ODB_SPEED_INDEX = 22;
+    const size_t GPS_SPEED_INDEX = 11;
+    ImGui::Begin("Speed");
+    ImGui::Text("Speed: %d km/h", int(rec.values[ODB_SPEED_INDEX]));
+    ImGui::End();
+}
+
 void LogRender::DrawTimeSlider()
 {
     ImGui::Begin("TimeSlider");

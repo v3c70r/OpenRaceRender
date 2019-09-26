@@ -33,19 +33,19 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
-#include <filesystem>
+//#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
 #include "imgui.h"
 
-#include "core/system.h"
-#include "gui/widgets/filedialog.h"
+//#include "core/system.h"
+#include "filedialog.h"
 
 struct InputTextCallback_UserData
 {
-    PCSX::u8string*          Str;
+    std::string*          Str;
     ImGuiInputTextCallback  ChainCallback;
     void*                   ChainCallbackUserData;
 };
@@ -57,7 +57,7 @@ static int InputTextCallback(ImGuiInputTextCallbackData* data)
     {
         // Resize string callback
         // If for some reason we refuse the new length (BufTextLen) and/or capacity (BufSize) we need to set them back to what we want.
-        PCSX::u8string* str = user_data->Str;
+        std::string* str = user_data->Str;
         IM_ASSERT(data->Buf == reinterpret_cast<const char *>(str->c_str()));
         str->resize(data->BufTextLen);
         data->Buf = (char*)str->c_str();
@@ -71,7 +71,7 @@ static int InputTextCallback(ImGuiInputTextCallbackData* data)
     return 0;
 }
 
-static bool InputText(const char* label, PCSX::u8string* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
+static bool InputText(const char* label, std::string* str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL)
 {
     IM_ASSERT((flags & ImGuiInputTextFlags_CallbackResize) == 0);
     flags |= ImGuiInputTextFlags_CallbackResize;
@@ -122,7 +122,7 @@ void PCSX::Widgets::FileDialog::fillRoots() {
     }
 }
 #else
-void PCSX::Widgets::FileDialog::fillRoots() { m_roots.push_back({MAKEU8(u8"/"), "(root)"}); }
+void PCSX::Widgets::FileDialog::fillRoots() { m_roots.push_back({(u8"/"), "(root)"}); }
 #endif
 
 void PCSX::Widgets::FileDialog::openDialog() {
@@ -131,7 +131,7 @@ void PCSX::Widgets::FileDialog::openDialog() {
     m_sorter.name = SORT_DOWN;
     m_sorter.size = UNSORTED;
     m_sorter.date = UNSORTED;
-    m_newFile = MAKEU8(u8"");
+    m_newFile = (u8"");
 }
 
 bool PCSX::Widgets::FileDialog::draw() {
@@ -174,7 +174,7 @@ bool PCSX::Widgets::FileDialog::draw() {
 
         bool goHome = false;
         bool goUp = false;
-        PCSX::u8string goDown = MAKEU8(u8"");
+        std::string goDown = (u8"");
         File* selected = nullptr;
 
         if (ImGui::Button(_("Home"))) goHome = true;
@@ -295,7 +295,7 @@ bool PCSX::Widgets::FileDialog::draw() {
             ImGui::Separator();
 
             for (auto& p : m_files) {
-                PCSX::u8string label = MAKEU8(u8"##") + p.filename;
+                std::string label = (u8"##") + p.filename;
                 if (ImGui::Selectable(reinterpret_cast<const char *>(label.c_str()), p.selected, ImGuiSelectableFlags_SpanAllColumns)) {
                     for (auto& f : m_files) f.selected = false;
                     p.selected = true;
@@ -316,7 +316,7 @@ bool PCSX::Widgets::FileDialog::draw() {
 
             ImGui::EndChild();
         }
-        PCSX::u8string selectedStr;
+        std::string selectedStr;
         bool gotSelected = selected;
         if (m_flags & NewFile) {
             ImGui::Text(reinterpret_cast<const char*>(m_currentPath.u8string().c_str()));
@@ -326,7 +326,7 @@ bool PCSX::Widgets::FileDialog::draw() {
             selectedStr = m_newFile;
             gotSelected = !m_newFile.empty();
         } else {
-            selectedStr = (m_currentPath / std::filesystem::path(selected ? selected->filename : MAKEU8(u8"..."))).u8string();
+            selectedStr = (m_currentPath / std::filesystem::path(selected ? selected->filename : (u8"..."))).u8string();
             ImGui::Text(reinterpret_cast<const char*>(selectedStr.c_str()));
         }
         if (!gotSelected) {
