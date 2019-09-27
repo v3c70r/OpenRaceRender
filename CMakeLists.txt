@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.0.0)
 #    message(FATAL_ERROR "VK_SDK_PATH is not defined")
 #endif()
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ### Handle dependencies
 
@@ -22,7 +22,11 @@ if (NOT ${glfw3_FOUND})
     add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/glfw)
     set(GLFW3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/glfw/include)
 endif()
-# build vulkanMemoryAllocator from source
+
+set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+find_package(FFmpeg REQUIRED)
+include_directories(${FFMPEG_INCLUDE_DIR})
+message(STATUS ${FFMPEG_LIBRARIES})
 
 
 if (UNIX)
@@ -54,8 +58,11 @@ add_library(imgui
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 
+add_library(decoder src/videodecoder.cpp)
+target_link_libraries(decoder ${FFMPEG_LIBRARIES})
+
 add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp)
-target_link_libraries(main imgui glfw gl3w)
+target_link_libraries(main imgui glfw gl3w decoder)
 
 enable_testing()
 add_executable(logtest src/test.cpp src/logreader.cpp)

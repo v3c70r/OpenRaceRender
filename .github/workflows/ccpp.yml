@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install dependencies
-      run: sudo apt -y install libxrandr-dev libxinerama-dev libxcursor-dev
+      run: sudo apt -y install libxrandr-dev libxinerama-dev libxcursor-dev ffmpeg
     - name: get submodules
       run: git submodule update --init
     - name: cmake
