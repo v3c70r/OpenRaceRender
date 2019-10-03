@@ -1,7 +1,6 @@
 #
 # Find the native FFMPEG includes and library
-# This module defines
-# FFMPEG_INCLUDE_DIR, where to find avcodec.h, avformat.h ...
+# This module defines # FFMPEG_INCLUDE_DIR, where to find avcodec.h, avformat.h ...
 # FFMPEG_LIBRARIES, the libraries to link against to use FFMPEG.
 # FFMPEG_FOUND, If false, do not try to use FFMPEG.
 # FFMPEG_ROOT, if this module use this path to find FFMPEG headers
@@ -107,7 +106,7 @@ FFMPEG_FIND(LIBAVFORMAT avformat avformat.h)
 FFMPEG_FIND(LIBAVDEVICE avdevice avdevice.h)
 FFMPEG_FIND(LIBAVCODEC  avcodec  avcodec.h)
 FFMPEG_FIND(LIBAVUTIL   avutil   avutil.h)
-FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look for here.
+#FFMPEG_FIND(LIBSWSCALE  swscale  swscale.h)  # not sure about the header to look for here.
 
 SET(FFMPEG_FOUND "NO")
 
@@ -128,5 +127,6 @@ IF (FFMPEG_LIBAVFORMAT_FOUND AND FFMPEG_LIBAVCODEC_FOUND AND STDINT_OK)
         ${FFMPEG_LIBAVDEVICE_LIBRARIES}
         ${FFMPEG_LIBAVCODEC_LIBRARIES}
         ${FFMPEG_LIBAVUTIL_LIBRARIES}
-        ${FFMPEG_LIBSWSCALE_LIBRARIES})
+        )
+        #${FFMPEG_LIBSWSCALE_LIBRARIES})
 ENDIF()

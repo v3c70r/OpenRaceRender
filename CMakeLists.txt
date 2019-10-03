@@ -24,9 +24,8 @@ if (NOT ${glfw3_FOUND})
 endif()
 
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
-find_package(FFmpeg REQUIRED)
+find_package(FFMPEG REQUIRED)
 include_directories(${FFMPEG_INCLUDE_DIR})
-message(STATUS ${FFMPEG_LIBRARIES})
 
 
 if (UNIX)
@@ -44,6 +43,7 @@ include_directories(
 include_directories(
     thirdparty/gl3w/include
     thirdparty/imgui
+    src
     )
 
 add_library(imgui
@@ -58,13 +58,21 @@ add_library(imgui
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 
-add_library(decoder src/videodecoder.cpp)
-target_link_libraries(decoder ${FFMPEG_LIBRARIES})
+add_library(videoplayer src/videoplayer.cpp)
+target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
 add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp)
-target_link_libraries(main imgui glfw gl3w decoder)
+target_link_libraries(main imgui glfw gl3w videoplayer)
 
 enable_testing()
-add_executable(logtest src/test.cpp src/logreader.cpp)
+add_executable(logtest src/test/testreader.cpp src/logreader.cpp)
+
+add_executable(videoplayertest src/test/testvideoplayer.cpp)
+target_link_libraries(videoplayertest videoplayer)
+
 add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-175620 Segment.csv")
-    
+#add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")
+
+# test video decoder 
+#add_executable(testFFmpeg src/videodecoder_test.cpp)
+#target_link_libraries(testFFmpeg ${FFMPEG_LIBRARIES})
