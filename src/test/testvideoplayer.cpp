@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 {
     VideoPlayer player;
 
-    assert(player.LoadFile("../raw/sample.mp4"));
+    assert(player.LoadFile("../raw/sample_1mb.mp4"));
 
     std::cout<<player.GetDebugStr()<<std::endl;
 

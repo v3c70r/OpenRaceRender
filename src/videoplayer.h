@@ -16,6 +16,7 @@ public:
     VideoPlayer() {}
     bool LoadFile(std::string path);
     void ShutDown();
+    void ReadFrame();
     std::string GetDebugStr()
     {
         std::stringstream ss;
@@ -24,17 +25,30 @@ public:
     }
 private:
     int OpenCodecContext(int* streamIdx, AVCodecContext** codecCtx, AVFormatContext* formatCtx, AVMediaType type);
+    int DecodePacket(int *GotFrame, int cached);
 private:
     AVFormatContext* m_pFormatContext = nullptr;
-    AVCodecContext* m_pVideoCodecCtx = nullptr;
-    AVCodecContext* m_pAudioCodecCtx = nullptr;
-    AVStream* m_pVideoStream = nullptr;
-    AVStream* m_pAudioStream = NULL;
-    AVPixelFormat m_ePixelFormat =  AV_PIX_FMT_NONE;
 
+    // Video stream info
+    AVCodecContext* m_pVideoCodecCtx = nullptr;
+    AVStream* m_pVideoStream = nullptr;
+    AVPixelFormat m_ePixelFormat =  AV_PIX_FMT_NONE;
+    int m_pVideoDstLinesize[4];
+    uint8_t* m_pVideoDstData[4] = {NULL};
+    size_t m_nVideoDstBufsize;
     int m_nVideoStreamIndex = -1;
-    int m_nAudioStreamIndex = -1;
-    
     int m_nWidth = 0;
     int m_nHeight = 0;
+
+    // Audio stream info
+    AVCodecContext* m_pAudioCodecCtx = nullptr;
+    AVStream* m_pAudioStream = nullptr;
+    int m_nAudioStreamIndex = -1;
+
+    // Decoder info
+    AVFrame* m_pFrame = nullptr;
+    AVPacket m_packet;
+
+    int m_nVideoFrameCount = 0;
+    int m_nAudioFrameCount = 0;
 };
