@@ -12,11 +12,11 @@ public:
     //VideoPlayerMPV();
 
     // Initialize OpenGL Context
-    void InitGLContext(void* pGlProcAddress)
+    void InitGLContext(void* (*GetProcAddress)(void*, const char*))
     {
         // TODO: Pass in get proc address callback here
         // See https://github.com/mpv-player/mpv-examples/blob/master/libmpv/qt_opengl/mpvwidget.cpp
-        mpv_opengl_init_params gl_init_params{nullptr, nullptr, nullptr};
+        mpv_opengl_init_params gl_init_params{GetProcAddress, nullptr, nullptr};
         mpv_render_param params[]{
             {MPV_RENDER_PARAM_API_TYPE,
              const_cast<char*>(MPV_RENDER_API_TYPE_OPENGL)},

@@ -62,24 +62,26 @@ add_library(imgui
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 
-add_library(videoplayer src/videoplayer.cpp)
-target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
+#add_library(videoplayer src/videoplayer.cpp)
+#target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
-add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp)
-target_link_libraries(main imgui glfw gl3w videoplayer)
+add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp src/test/videoplayermpv.cpp)
+target_link_libraries(main imgui glfw gl3w)
 
 enable_testing()
 add_executable(logtest src/test/testreader.cpp src/logreader.cpp)
 
-add_executable(videoplayertest src/test/testvideoplayer.cpp)
-target_link_libraries(videoplayertest videoplayer)
+#add_executable(videoplayertest src/test/testvideoplayer.cpp)
+#target_link_libraries(videoplayertest videoplayer)
 
 add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-175620 Segment.csv")
 
 ########################
 # Test different libraries
 add_executable(mpvtest src/test/testmpv.cpp)
-find_library(MPV NAMES "libmpv.so.1" PATH "/usr/lib/x86_64-linux-gnu/")
+find_library(MPV NAMES "libmpv.so.1" "libmpv.dylib" PATH "/usr/lib/x86_64-linux-gnu/" "/usr/local/lib")
+
+target_link_libraries(main ${MPV})
 
 target_link_libraries(mpvtest ${MPV})
 #add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")

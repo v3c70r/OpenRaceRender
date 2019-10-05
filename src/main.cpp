@@ -10,6 +10,7 @@
 
 #include "logreader.h"
 #include "logrender.h"
+#include "./test/videoplayermpv.h"
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
 // Helper libraries are often used for this purpose! Here we are supporting a few common ones: gl3w, glew, glad.
@@ -37,6 +38,11 @@
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+static void* GetProcAddress(void* ctx, const char* name)
+{
+    GL3WglProc proc = gl3wGetProcAddress(name);
+    return (void*)proc;
 }
 
 int main(int argc, char** argv)
@@ -70,9 +76,11 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
+    VideoPlayerMPV videoplayer;
     // Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
+
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
     bool err = glewInit() != GLEW_OK;
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
@@ -85,6 +93,8 @@ int main(int argc, char** argv)
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
+
+    videoplayer.InitGLContext(GetProcAddress);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
