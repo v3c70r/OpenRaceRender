@@ -27,6 +27,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(FFMPEG REQUIRED)
 include_directories(${FFMPEG_INCLUDE_DIR})
 
+#find_package(MPV REQUIRED)
+#include_directories(${MPV_INCLUDE_DIR})
+
 
 if (UNIX)
     set (CMAKE_CXX_FLAGS "-std=c++17 -Wall -pthread -Wno-missing-braces -g")
@@ -41,6 +44,7 @@ include_directories(
     )
 
 include_directories(
+    thirdparty
     thirdparty/gl3w/include
     thirdparty/imgui
     src
@@ -71,6 +75,13 @@ add_executable(videoplayertest src/test/testvideoplayer.cpp)
 target_link_libraries(videoplayertest videoplayer)
 
 add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-175620 Segment.csv")
+
+########################
+# Test different libraries
+add_executable(mpvtest src/test/testmpv.cpp)
+find_library(MPV NAMES "libmpv.so.1" PATH "/usr/lib/x86_64-linux-gnu/")
+
+target_link_libraries(mpvtest ${MPV})
 #add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")
 
 # test video decoder 
