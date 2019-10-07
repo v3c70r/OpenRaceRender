@@ -5,12 +5,14 @@ class LogRender
 public:
     LogRender(const LogReader& LogReader);
 
+// Draw functions for different boxes
     void DrawHeaderBox();
     void DrawDataBox();
     void DrawTimeSlider();
     void DrawRevBox();
     void DrawThrottleBrakeBox();
     void DrawSpeedBox();
+    void DrawMap();
 
     void Update(float dt)
     {

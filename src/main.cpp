@@ -10,7 +10,7 @@
 
 #include "logreader.h"
 #include "logrender.h"
-#include "./test/videoplayermpv.h"
+#include "videoplayermpv.h"
 
 // About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
 // Helper libraries are often used for this purpose! Here we are supporting a few common ones: gl3w, glew, glad.
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-    VideoPlayerMPV videoplayer;
+    VideoPlayerMPV videoPlayer;
     // Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
@@ -94,7 +94,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    videoplayer.InitGLContext(GetProcAddress);
+    videoPlayer.InitGLContext(GetProcAddress);
+    videoPlayer.LoadVideo("../raw/sample.mp4");
+
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -163,14 +165,16 @@ int main(int argc, char** argv)
         ////////////////////////////////
         //ImGui::Text("%s\n", reader.GetDebugStr().c_str());
         render.DrawDataBox();
-        render.DrawTimeSlider();
-        render.DrawThrottleBrakeBox();
-        render.DrawSpeedBox();
+        //render.DrawTimeSlider();
+        //render.DrawThrottleBrakeBox();
+        //render.DrawSpeedBox();
+        //render.DrawMap();
         render.Update(1.0f / ImGui::GetIO().Framerate);
         //////////////////////////////
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
+
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         //{
@@ -212,6 +216,8 @@ int main(int argc, char** argv)
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        videoPlayer.Render(0, display_w, display_h); 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
@@ -221,6 +227,8 @@ int main(int argc, char** argv)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    videoPlayer.DestroyGLContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();

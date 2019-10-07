@@ -75,6 +75,10 @@ LogReader::LogReader(const std::string& fileName)
         }
         lineCount++;
     }
+
+    // Update bounding box
+    // Put it out of the loop for readability
+    UpdateTrajectory();
 }
 
 std::string LogReader::GetDebugStr() const
@@ -130,6 +134,39 @@ const RaceRecord& LogReader::GetLowerBoundRecord(float timestamp) const
     return *it;
 }
 
+std::vector<SVec2> LogReader::GetNormalizedTrajectory() const
+{
+    std::vector<SVec2> res;
+    res.reserve(m_vTrajectory.size());
+    float fXScale = m_boundingBox.upper.x - m_boundingBox.lower.x;
+    float fYScale = m_boundingBox.upper.y - m_boundingBox.lower.y;
+    float fScale = std::max(fYScale, fXScale);
+    for (const SVec2& point: m_vTrajectory)
+    {
+        res.push_back((point - m_boundingBox.lower) / fScale);
+    }
+    return res;
+}
+
+//////////////////////////////////////////////////////////
+
+void LogReader::UpdateTrajectory()
+{
+    int nLongitudeIdx = 8;   // x
+    int nLatitudeIdx = 7;    //y
+    m_boundingBox = {
+        {m_maxRecord.values[nLongitudeIdx], m_maxRecord.values[nLatitudeIdx]},
+        {m_minRecord.values[nLongitudeIdx], m_minRecord.values[nLatitudeIdx]}
+    };
+    m_vTrajectory.clear();
+    m_vTrajectory.reserve(m_vRecords.size());
+    for (const RaceRecord& rec: m_vRecords)
+    {
+        float x = rec.values[nLongitudeIdx];
+        float y = rec.values[nLatitudeIdx];
+        m_vTrajectory.push_back(SVec2({x, y}));
+    }
+}
 //////////////////////////////////////////////////////////
 
 std::vector<std::string> LogReader::SplitString(const std::string& input,

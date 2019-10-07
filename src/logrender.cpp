@@ -48,6 +48,26 @@ void DrawLapTime()
 {
 }
 
+void LogRender::DrawMap()
+{
+    ImGui::Begin("Map");
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
+    std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
+    for (int i = 0; i < normalizedPoints.size() - 1; i += 2)
+    {
+        ImVec2 point0(normalizedPoints[i].x * 10.0, normalizedPoints[i].y * 10.0);
+        ImVec2 point1(normalizedPoints[i + 1].x * 10.0, normalizedPoints[i + 1].y * 10.0);
+        draw_list->AddLine(
+            ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
+            ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
+            IM_COL32(255, 255, 0, 255), 2.0f);
+    }
+
+    ImGui::End();
+}
+
+
 void LogRender::DrawSpeedBox()
 {
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);

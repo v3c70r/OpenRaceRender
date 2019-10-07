@@ -65,7 +65,7 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 #add_library(videoplayer src/videoplayer.cpp)
 #target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
-add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp src/test/videoplayermpv.cpp)
+add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp)
 target_link_libraries(main imgui glfw gl3w)
 
 enable_testing()
@@ -79,7 +79,8 @@ add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-17
 ########################
 # Test different libraries
 add_executable(mpvtest src/test/testmpv.cpp)
-find_library(MPV NAMES "libmpv.so.1" "libmpv.dylib" PATH "/usr/lib/x86_64-linux-gnu/" "/usr/local/lib")
+find_library(MPV NAMES "libmpv.so" "libmpv.dylib" PATHS "/home/qgu/tmp/mpv-build/mpv/build" "/usr/local/lib")
+message(STATUS ${MPV})
 
 target_link_libraries(main ${MPV})
 
