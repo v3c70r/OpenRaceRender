@@ -39,7 +39,8 @@ LogReader::LogReader(const std::string& fileName)
                 m_minRecord.values.resize(m_vHeaders.size(),
                                           std::numeric_limits<float>::max());
                 m_maxRecord.values.resize(m_vHeaders.size(),
-                                          std::numeric_limits<float>::min());
+                                          std::numeric_limits<float>::lowest());
+
             }
             else
             {
@@ -60,15 +61,20 @@ LogReader::LogReader(const std::string& fileName)
 
                     for (size_t i = 0; i < rec.size(); i++)
                     {
-                        m_minRecord.values[i] =
-                            timestamp < m_minRecord.values[i]
-                                ? timestamp
-                                : m_minRecord.values[i];
+                        if (rec[i] < m_minRecord.values[i])
+                            m_minRecord.values[i] = rec[i];
 
-                        m_maxRecord.values[i] =
-                            timestamp > m_maxRecord.values[i]
-                                ? timestamp
-                                : m_maxRecord.values[i];
+                        if (rec[i] > m_maxRecord.values[i])
+                            m_maxRecord.values[i] = rec[i];
+                        //m_minRecord.values[i] =
+                        //    rec[i] < m_minRecord.values[i]
+                        //        ? rec[i]
+                        //        : m_minRecord.values[i];
+
+                        //m_maxRecord.values[i] =
+                        //    rec[i] > m_maxRecord.values[i]
+                        //        ? rec[i]
+                        //        : m_maxRecord.values[i];
                     }
                 }
             }
@@ -103,6 +109,8 @@ std::string LogReader::GetDebugStr() const
         ss << item << "\t";
     }
     ss << std::endl;
+    ss<< "Bounding box: "<<m_boundingBox.lower.x<<"\t"<<m_boundingBox.lower.y<<std::endl;
+    ss<< "Bounding box: "<<m_boundingBox.upper.x<<"\t"<<m_boundingBox.upper.y;
     return ss.str();
 }
 

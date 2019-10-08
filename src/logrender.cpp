@@ -56,8 +56,8 @@ void LogRender::DrawMap()
     std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
     for (int i = 0; i < normalizedPoints.size() - 1; i += 2)
     {
-        ImVec2 point0(normalizedPoints[i].x * 10.0, normalizedPoints[i].y * 10.0);
-        ImVec2 point1(normalizedPoints[i + 1].x * 10.0, normalizedPoints[i + 1].y * 10.0);
+        ImVec2 point0(normalizedPoints[i].x * 500.0, normalizedPoints[i].y * 500.0);
+        ImVec2 point1(normalizedPoints[i + 1].x * 500.0, normalizedPoints[i + 1].y * 500.0);
         draw_list->AddLine(
             ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
             ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
@@ -78,11 +78,16 @@ void LogRender::DrawSpeedBox()
     ImGui::End();
 }
 
-void LogRender::DrawTimeSlider()
+float LogRender::DrawTimeSlider()
 {
+    static bool bIsEdited = false;
     ImGui::Begin("TimeSlider");
     ImGui::SliderFloat("", &m_fTime, m_logReader.GetMinTimeStamp(),
                        m_logReader.GetMaxTimeStamp(), "%.2f");
+    bIsEdited = ImGui::IsItemEdited();
     ImGui::End();
+
+    if (bIsEdited) return m_fTime;
+    else return -1.0;
 };
 

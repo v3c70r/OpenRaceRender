@@ -94,8 +94,6 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    videoPlayer.InitGLContext(GetProcAddress);
-    videoPlayer.LoadVideo("../raw/sample.mp4");
 
 
     // Setup Dear ImGui context
@@ -146,6 +144,8 @@ int main(int argc, char** argv)
     }
     LogReader reader(fileName);
     LogRender render(reader);
+    videoPlayer.InitGLContext(GetProcAddress);
+    videoPlayer.LoadVideo("../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.mp4");
     /////////////////// 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -163,12 +163,17 @@ int main(int argc, char** argv)
         ImGui::NewFrame();
 
         ////////////////////////////////
-        //ImGui::Text("%s\n", reader.GetDebugStr().c_str());
+        ImGui::Text("%s\n", reader.GetDebugStr().c_str());
         render.DrawDataBox();
-        //render.DrawTimeSlider();
+        static float fSeekTime = -1.0;
+        fSeekTime = render.DrawTimeSlider();
+        if (fSeekTime > 0.0)
+        {
+            videoPlayer.SetTime(fSeekTime);
+        }
         //render.DrawThrottleBrakeBox();
         //render.DrawSpeedBox();
-        //render.DrawMap();
+        render.DrawMap();
         render.Update(1.0f / ImGui::GetIO().Framerate);
         //////////////////////////////
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).

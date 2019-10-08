@@ -7,10 +7,12 @@ extern "C"{
 #include <string>
 #include <cassert>
 
+#include <iostream>
+
 class VideoPlayerMPV
 {
 public:
-    VideoPlayerMPV() : m_fTime(0.0)
+    VideoPlayerMPV()
     {
         m_pHandle = mpv_create();
         assert(m_pHandle);
@@ -23,7 +25,6 @@ public:
     // Initialize OpenGL Context
     void InitGLContext(void* (*GetProcAddress)(void*, const char*))
     {
-        // TODO: Pass in get proc address callback here
         // See https://github.com/mpv-player/mpv-examples/blob/master/libmpv/qt_opengl/mpvwidget.cpp
         mpv_opengl_init_params gl_init_params{GetProcAddress, nullptr, nullptr};
         mpv_render_param params[]{
@@ -51,18 +52,45 @@ public:
         assert(mpv_render_context_render(m_pRenderContext, params) >= 0);
     }
 
+    void SetTime(float time)
+    {
+        char strTime[24];
+        // TODO: Handle seek bound check
+        if (time < 99999)
+        {
+            sprintf(strTime, "%d", int(time));
+            const char* cmd[] = {"seek", strTime, "absolute", nullptr};
+            assert(mpv_command(m_pHandle, cmd) >= 0);
+        }
+    }
+
+    void PlayPause()
+    {
+    }
+
     void LoadVideo(std::string path)
     {
-        (mpv_set_option_string(m_pHandle, "input-default-bindings", "yes"));
-        mpv_set_option_string(m_pHandle, "input-vo-keyboard", "yes");
-        int val = 1;
-        (mpv_set_option(m_pHandle, "osc", MPV_FORMAT_FLAG, &val));
-        (mpv_initialize(m_pHandle));
-        const char* cmd[] = {"loadfile", path.c_str(), NULL};
+        //int val = 1;
+        assert(mpv_initialize(m_pHandle) >= 0);
+        const char* cmd[] = {"loadfile", path.c_str(), nullptr};
         assert(mpv_command(m_pHandle, cmd) >= 0);
+
+        // TODO: Load video infos
+        //int res = -1;
+        //while (res < 0)
+        //{
+        //    res = mpv_get_property(m_pHandle, "duration", MPV_FORMAT_DOUBLE,
+        //                           &m_fDuration);
+        //    std::cout << res << std::endl;
+        //}
     }
 
 private:
     mpv_handle* m_pHandle = nullptr;
     mpv_render_context* m_pRenderContext = nullptr;
+    bool m_bPlaying = true;
+
+    // status
+    float m_fDuration = 0.0;
+    
 };

@@ -8,7 +8,7 @@ public:
 // Draw functions for different boxes
     void DrawHeaderBox();
     void DrawDataBox();
-    void DrawTimeSlider();
+    float DrawTimeSlider();
     void DrawRevBox();
     void DrawThrottleBrakeBox();
     void DrawSpeedBox();
