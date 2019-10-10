@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "filedialog/filedialog.h"
 #include <stdio.h>
 
 
@@ -43,6 +44,12 @@ static void* GetProcAddress(void* ctx, const char* name)
 {
     GL3WglProc proc = gl3wGetProcAddress(name);
     return (void*)proc;
+}
+
+static const char TITLE[] = "title";
+const char* GetTitle()
+{
+    return TITLE;
 }
 
 int main(int argc, char** argv)
@@ -131,6 +138,7 @@ int main(int argc, char** argv)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     /////////////////// create log reader
+    PCSX::Widgets::FileDialog fileDialg(GetTitle);
     std::string fileName;
     if (argc == 2)
     {
@@ -148,6 +156,7 @@ int main(int argc, char** argv)
     videoPlayer.LoadVideo("../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.mp4");
     /////////////////// 
     // Main loop
+    bool OpenDialogPending = true;
     while (!glfwWindowShouldClose(window))
     {
         // Poll and handle events (inputs, window resize, etc.)
@@ -175,6 +184,13 @@ int main(int argc, char** argv)
         //render.DrawSpeedBox();
         render.DrawMap();
         render.Update(1.0f / ImGui::GetIO().Framerate);
+
+        //if(OpenDialogPending)
+        {
+            fileDialg.openDialog();
+            OpenDialogPending = false;
+        }
+        fileDialg.draw();
         //////////////////////////////
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)

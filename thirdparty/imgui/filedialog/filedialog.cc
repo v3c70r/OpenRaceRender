@@ -177,12 +177,12 @@ bool PCSX::Widgets::FileDialog::draw() {
         std::string goDown = (u8"");
         File* selected = nullptr;
 
-        if (ImGui::Button(_("Home"))) goHome = true;
+        if (ImGui::Button(("Home"))) goHome = true;
         ImGui::SameLine();
         ImGui::Text(reinterpret_cast<const char*>(m_currentPath.u8string().c_str()));
         {
             ImGui::BeginChild("Directories", ImVec2(250, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
-            if (ImGui::TreeNode(_("Roots"))) {
+            if (ImGui::TreeNode(("Roots"))) {
                 for (auto& p : m_roots) {
                     if (ImGui::Selectable(p.label.c_str(), false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) {
                         goDown = p.root;
@@ -190,7 +190,7 @@ bool PCSX::Widgets::FileDialog::draw() {
                 }
                 ImGui::TreePop();
             }
-            if (ImGui::TreeNodeEx(_("Directories"), ImGuiTreeNodeFlags_DefaultOpen)) {
+            if (ImGui::TreeNodeEx(("Directories"), ImGuiTreeNodeFlags_DefaultOpen)) {
                 if (ImGui::Selectable("..", false, 0, ImVec2(ImGui::GetWindowContentRegionWidth(), 0))) {
                     goUp = true;
                 }
@@ -206,17 +206,17 @@ bool PCSX::Widgets::FileDialog::draw() {
         ImGui::SameLine();
         {
             std::string header;
-            ImGui::BeginChild(_("Files"), ImVec2(500, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
+            ImGui::BeginChild(("Files"), ImVec2(500, 350), true, ImGuiWindowFlags_HorizontalScrollbar);
             ImGui::Columns(3);
             switch (m_sorter.name) {
                 case UNSORTED:
-                    header = _("  File");
+                    header = ("  File");
                     break;
                 case SORT_DOWN:
-                    header = _("v File");
+                    header = ("v File");
                     break;
                 case SORT_UP:
-                    header = _("^ File");
+                    header = ("^ File");
                     break;
             }
             if (ImGui::Selectable(header.c_str())) {
@@ -238,13 +238,13 @@ bool PCSX::Widgets::FileDialog::draw() {
             ImGui::NextColumn();
             switch (m_sorter.size) {
                 case UNSORTED:
-                    header = _("  Size");
+                    header = ("  Size");
                     break;
                 case SORT_DOWN:
-                    header = _("v Size");
+                    header = ("v Size");
                     break;
                 case SORT_UP:
-                    header = _("^ Size");
+                    header = ("^ Size");
                     break;
             }
             if (ImGui::Selectable(header.c_str())) {
@@ -266,13 +266,13 @@ bool PCSX::Widgets::FileDialog::draw() {
             ImGui::NextColumn();
             switch (m_sorter.date) {
                 case UNSORTED:
-                    header = _("  Date & Time");
+                    header = ("  Date & Time");
                     break;
                 case SORT_DOWN:
-                    header = _("v Date & Time");
+                    header = ("v Date & Time");
                     break;
                 case SORT_UP:
-                    header = _("^ Date & Time");
+                    header = ("^ Date & Time");
                     break;
             }
             if (ImGui::Selectable(header.c_str())) {
@@ -335,7 +335,7 @@ bool PCSX::Widgets::FileDialog::draw() {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, lolight);
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, lolight);
         }
-        if (ImGui::Button(_("OK"), ImVec2(120, 30)) && gotSelected) {
+        if (ImGui::Button(("OK"), ImVec2(120, 30)) && gotSelected) {
             m_selected.clear();
             m_selected.push_back(selectedStr);
             ImGui::CloseCurrentPopup();
@@ -344,7 +344,7 @@ bool PCSX::Widgets::FileDialog::draw() {
         if (!gotSelected) ImGui::PopStyleColor(3);
         ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
-        if (ImGui::Button(_("Cancel"), ImVec2(120, 30))) {
+        if (ImGui::Button(("Cancel"), ImVec2(120, 30))) {
             ImGui::CloseCurrentPopup();
             done = true;
         }
