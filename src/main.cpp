@@ -7,6 +7,8 @@
 #include "imgui_impl_opengl3.h"
 #include "filedialog/filedialog.h"
 #include <stdio.h>
+#include <memory>
+#include <string>
 
 
 #include "logreader.h"
@@ -83,7 +85,6 @@ int main(int argc, char** argv)
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-    VideoPlayerMPV videoPlayer;
     // Initialize OpenGL loader
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
@@ -137,33 +138,31 @@ int main(int argc, char** argv)
     bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    /////////////////// create log reader
+    /////////////////// Create my stuff
     PCSX::Widgets::FileDialog fileDialg(GetTitle);
-    std::string fileName;
-    if (argc == 2)
+    std::string sLogFile;
+    std::string sVideoFile;
+    std::unique_ptr<LogReader> pReader = nullptr;
+    std::unique_ptr<LogRender> pRender = nullptr;
+    if (argc == 3)
     {
-        fileName = argv[1];
+        sLogFile = argv[1];
+        sVideoFile = argv[2];
+        if (std::filesystem::exists(std::filesystem::path(argv[1])))
+        {
+            pReader = std::make_unique<LogReader>(argv[1]);
+            pRender = std::make_unique<LogRender>(*pReader);
+        }
+        videoPlayer.LoadVideo(sVideoFile);
     }
-    //if (fileName.ex
-    else
-    {
-        // TODO: File dialog
-        fileName = "../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.csv";
-    }
-    LogReader reader(fileName);
-    LogRender render(reader);
+
+    VideoPlayerMPV videoPlayer;
     videoPlayer.InitGLContext(GetProcAddress);
     videoPlayer.LoadVideo("../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.mp4");
     /////////////////// 
     // Main loop
-    bool OpenDialogPending = true;
     while (!glfwWindowShouldClose(window))
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
         // Start the Dear ImGui frame
@@ -172,63 +171,34 @@ int main(int argc, char** argv)
         ImGui::NewFrame();
 
         ////////////////////////////////
-        ImGui::Text("%s\n", reader.GetDebugStr().c_str());
-        render.DrawDataBox();
-        static float fSeekTime = -1.0;
-        fSeekTime = render.DrawTimeSlider();
-        if (fSeekTime > 0.0)
+        if (pReader == nullptr)
         {
-            videoPlayer.SetTime(fSeekTime);
-        }
-        //render.DrawThrottleBrakeBox();
-        //render.DrawSpeedBox();
-        render.DrawMap();
-        render.Update(1.0f / ImGui::GetIO().Framerate);
-
-        //if(OpenDialogPending)
-        {
+            auto selectedFiles = fileDialg.selected();
+            if (!selectedFiles.empty())
+            {
+                pReader = std::make_unique<LogReader>(selectedFiles[0]);
+                pRender = std::make_unique<LogRender>(*pReader);
+            }
             fileDialg.openDialog();
-            OpenDialogPending = false;
+        }
+        else
+        {
+            ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
+            pRender->DrawDataBox();
+            static float fSeekTime = -1.0;
+            fSeekTime = pRender->DrawTimeSlider();
+            if (fSeekTime > 0.0)
+            {
+                videoPlayer.SetTime(fSeekTime);
+            }
+            // render.DrawThrottleBrakeBox();
+            // render.DrawSpeedBox();
+            pRender->DrawMap();
+            pRender->Update(1.0f / ImGui::GetIO().Framerate);
         }
         fileDialg.draw();
-        //////////////////////////////
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
-
-
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-        //{
-        //    static float f = 0.0f;
-        //    static int counter = 0;
-
-        //    ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-        //    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-        //    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-        //    ImGui::Checkbox("Another Window", &show_another_window);
-
-        //    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-        //    ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-        //    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        //        counter++;
-        //    ImGui::SameLine();
-        //    ImGui::Text("counter = %d", counter);
-
-        //    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        //    ImGui::End();
-        //}
-
-        // 3. Show another simple window.
-        //if (show_another_window)
-        //{
-        //    ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-        //    ImGui::Text("Hello from another window!");
-        //    if (ImGui::Button("Close Me"))
-        //        show_another_window = false;
-        //    ImGui::End();
-        //}
 
         // Rendering
         ImGui::Render();
