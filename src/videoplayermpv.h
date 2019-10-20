@@ -42,6 +42,10 @@ public:
 
     void Render(int nFbo, int nWidth, int nHeight)
     {
+
+        if (!m_bIsVideoLoaded) return;
+        if (!m_bIsPlaying) return;
+
         mpv_opengl_fbo fbo{nFbo, nWidth, nHeight, 0};
         int flip_y{1};
 
@@ -54,6 +58,8 @@ public:
 
     void SetTime(float time)
     {
+        if (!m_bIsVideoLoaded) return;
+
         char strTime[24];
         // TODO: Handle seek bound check
         if (time < 99999)
@@ -64,8 +70,14 @@ public:
         }
     }
 
-    void PlayPause()
+    void TogglePlaying()
     {
+        m_bIsPlaying = !m_bIsPlaying;
+    }
+
+    void SetPlaying(bool bPlaying)
+    {
+        m_bIsPlaying = bPlaying;
     }
 
     void LoadVideo(std::string path)
@@ -74,6 +86,7 @@ public:
         assert(mpv_initialize(m_pHandle) >= 0);
         const char* cmd[] = {"loadfile", path.c_str(), nullptr};
         assert(mpv_command(m_pHandle, cmd) >= 0);
+        m_bIsVideoLoaded = true;
 
         // TODO: Load video infos
         //int res = -1;
@@ -88,7 +101,8 @@ public:
 private:
     mpv_handle* m_pHandle = nullptr;
     mpv_render_context* m_pRenderContext = nullptr;
-    bool m_bPlaying = true;
+    bool m_bIsPlaying = false;
+    bool m_bIsVideoLoaded = false;
 
     // status
     float m_fDuration = 0.0;

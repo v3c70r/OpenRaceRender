@@ -15,20 +15,8 @@
 #include "logrender.h"
 #include "videoplayermpv.h"
 
-// About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually.
-// Helper libraries are often used for this purpose! Here we are supporting a few common ones: gl3w, glew, glad.
-// You may use another loader/header of your choice (glext, glLoadGen, etc.), or chose to manually implement your own.
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 #include <GL/gl3w.h>    // Initialize with gl3wInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>    // Initialize with glewInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-#include <glad/glad.h>  // Initialize with gladLoadGL()
-#else
-#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#endif
 
-// Include glfw3.h after our OpenGL definitions
 #include <GLFW/glfw3.h>
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
@@ -79,23 +67,15 @@ int main(int argc, char** argv)
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenRaceRender", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
     // Initialize OpenGL loader
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
     bool err = gl3wInit() != 0;
 
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-    bool err = glewInit() != GLEW_OK;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-    bool err = gladLoadGL() == 0;
-#else
-    bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader is likely to requires some form of initialization.
-#endif
     if (err)
     {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
@@ -103,36 +83,26 @@ int main(int argc, char** argv)
     }
 
 
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsClassic();
+    static ImGuiStyle style = ImGui::GetStyle();
+    style.Alpha = 0.3;
+
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Read 'misc/fonts/README.txt' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != NULL);
+    io.Fonts->AddFontDefault();
+    ImFont* pRoboto = io.Fonts->AddFontFromFileTTF("../Roboto/Roboto-Bold.ttf", 16.0f);
+    IM_ASSERT(pRoboto != NULL);
 
     // Our state
     bool show_demo_window = true;
@@ -144,21 +114,23 @@ int main(int argc, char** argv)
     std::string sVideoFile;
     std::unique_ptr<LogReader> pReader = nullptr;
     std::unique_ptr<LogRender> pRender = nullptr;
+    VideoPlayerMPV videoPlayer;
     if (argc == 3)
     {
         sLogFile = argv[1];
         sVideoFile = argv[2];
-        if (std::filesystem::exists(std::filesystem::path(argv[1])))
+        if (std::filesystem::exists(std::filesystem::path(sLogFile)))
         {
-            pReader = std::make_unique<LogReader>(argv[1]);
+            pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
         }
-        videoPlayer.LoadVideo(sVideoFile);
+        if (std::filesystem::exists(std::filesystem::path(sVideoFile)))
+        {
+            videoPlayer.LoadVideo(sVideoFile);
+        }
     }
 
-    VideoPlayerMPV videoPlayer;
     videoPlayer.InitGLContext(GetProcAddress);
-    videoPlayer.LoadVideo("../raw/Log-20190902-190235 Saint-Eustache - 1.06.879.mp4");
     /////////////////// 
     // Main loop
     while (!glfwWindowShouldClose(window))
@@ -169,6 +141,7 @@ int main(int argc, char** argv)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGui::PushFont(pRoboto);
 
         ////////////////////////////////
         if (pReader == nullptr)
@@ -191,14 +164,22 @@ int main(int argc, char** argv)
             {
                 videoPlayer.SetTime(fSeekTime);
             }
-            // render.DrawThrottleBrakeBox();
-            // render.DrawSpeedBox();
+            pRender->DrawBasicInfoBox();
+            pRender->DrawAcceBox();
             pRender->DrawMap();
             pRender->Update(1.0f / ImGui::GetIO().Framerate);
         }
         fileDialg.draw();
+
+        static bool bIsPlaying;
+        bIsPlaying = pRender->IsPlaying();
+        videoPlayer.SetPlaying(bIsPlaying);
         if (show_demo_window)
+        {
+            ImGui::ShowMetricsWindow(&show_demo_window);
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
+        ImGui::PopFont();
 
         // Rendering
         ImGui::Render();

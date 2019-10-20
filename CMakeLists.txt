@@ -59,6 +59,7 @@ add_library(imgui
     thirdparty/imgui/imgui_impl_opengl3.cpp
     thirdparty/imgui/imgui_impl_glfw.cpp
     thirdparty/imgui/filedialog/filedialog.cc
+    thirdparty/imgui/imgui_plot/imgui_plot.cpp
     )
 
 add_library(gl3w thirdparty/gl3w/src/gl3w.c)
@@ -67,8 +68,8 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 #target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
 find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
-add_executable(main src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp)
-target_link_libraries(main imgui glfw gl3w ${CPPFS})
+add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp)
+target_link_libraries(OpenRaceRender imgui glfw gl3w ${CPPFS})
 
 enable_testing()
 add_executable(logtest src/test/testreader.cpp src/logreader.cpp)
@@ -84,7 +85,7 @@ add_executable(mpvtest src/test/testmpv.cpp)
 find_library(MPV NAMES "libmpv.so" "libmpv.dylib" PATHS "/home/qgu/tmp/mpv-build/mpv/build" "/usr/local/lib")
 message(STATUS ${MPV})
 
-target_link_libraries(main ${MPV})
+target_link_libraries(OpenRaceRender ${MPV})
 
 target_link_libraries(mpvtest ${MPV})
 #add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")

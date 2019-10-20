@@ -41,6 +41,9 @@ public:
     float GetMinTimeStamp() const { return m_minRecord.timestamp; }
     float GetMaxTimeStamp() const { return m_maxRecord.timestamp; }
 
+    const RaceRecord& GetMinRecord() const { return m_minRecord; }
+    const RaceRecord& GetMaxRecord() const { return m_maxRecord; }
+
     SAABB GetAABB() const { return m_boundingBox; }
     const std::vector<SVec2>& GetTrajectory() const { return m_vTrajectory;}
     std::vector<SVec2> GetNormalizedTrajectory() const;
