@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-
-# Set system env
-#if (NOT DEFINED VK_SDK_PATH)
-#    message(FATAL_ERROR "VK_SDK_PATH is not defined")
-#endif()
+project(OpenRaceRender)
 
 #set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
