@@ -9,8 +9,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: Add PPA
+      run: sudo add-apt-repository ppa:mc3man/bionic-media -y
     - name: install dependencies
-      run: sudo add-apt-repository ppa:mc3man/bionic-media
       run: sudo apt-get update && sudo apt -y install libxrandr-dev libxinerama-dev libxcursor-dev libx11-dev g++-8 libmpv-dev libxi-dev freeglut3-dev libmpv-dev
     - name: get submodules
       run: git submodule update --init
