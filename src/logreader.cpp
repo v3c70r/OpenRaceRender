@@ -66,15 +66,6 @@ LogReader::LogReader(const std::string& fileName)
 
                         if (rec[i] > m_maxRecord.values[i])
                             m_maxRecord.values[i] = rec[i];
-                        //m_minRecord.values[i] =
-                        //    rec[i] < m_minRecord.values[i]
-                        //        ? rec[i]
-                        //        : m_minRecord.values[i];
-
-                        //m_maxRecord.values[i] =
-                        //    rec[i] > m_maxRecord.values[i]
-                        //        ? rec[i]
-                        //        : m_maxRecord.values[i];
                     }
                 }
             }

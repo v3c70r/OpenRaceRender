@@ -10,6 +10,7 @@ It is similar to [RaceRender](http://racerender.com/RR3/Features.html) but with 
 ```
 OpenRaceRender <LogFile> <VideoFile>
 ```
+A file dialog will pop up at launch if LogFile is not provided.
 
 ## Supported Widget
 

@@ -62,7 +62,5 @@ private:
     RaceRecord m_maxRecord; // Contains all of the max values for each items
     SAABB m_boundingBox;
     std::vector<SVec2> m_vTrajectory;
-
-
 };
 

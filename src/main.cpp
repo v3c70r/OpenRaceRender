@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(0); // Enable vsync
 
     // Initialize OpenGL loader
     bool err = gl3wInit() != 0;
@@ -115,18 +115,21 @@ int main(int argc, char** argv)
     std::unique_ptr<LogReader> pReader = nullptr;
     std::unique_ptr<LogRender> pRender = nullptr;
     VideoPlayerMPV videoPlayer;
-    if (argc == 3)
+    if (argc > 2)
     {
         sLogFile = argv[1];
-        sVideoFile = argv[2];
         if (std::filesystem::exists(std::filesystem::path(sLogFile)))
         {
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
         }
-        if (std::filesystem::exists(std::filesystem::path(sVideoFile)))
+        if (argc == 3)
         {
-            videoPlayer.LoadVideo(sVideoFile);
+            sVideoFile = argv[2];
+            if (std::filesystem::exists(std::filesystem::path(sVideoFile)))
+            {
+                videoPlayer.LoadVideo(sVideoFile);
+            }
         }
     }
 
@@ -146,14 +149,20 @@ int main(int argc, char** argv)
         ////////////////////////////////
         if (pReader == nullptr)
         {
-            auto selectedFiles = fileDialg.selected();
-            if (!selectedFiles.empty())
-            {
-                pReader = std::make_unique<LogReader>(selectedFiles[0]);
-                pRender = std::make_unique<LogRender>(*pReader);
-            }
             fileDialg.openDialog();
-            fileDialg.draw();
+            if (fileDialg.draw())
+            {
+                auto selectedFiles = fileDialg.selected();
+                if (selectedFiles.empty())
+                {
+                    break;
+                }
+                else
+                {
+                    pReader = std::make_unique<LogReader>(selectedFiles[0]);
+                    pRender = std::make_unique<LogRender>(*pReader);
+                }
+            }
         }
         else
         {
@@ -167,7 +176,7 @@ int main(int argc, char** argv)
             }
             pRender->DrawBasicInfoBox();
             pRender->DrawAcceBox();
-            pRender->DrawMap();
+            //pRender->DrawMap();
             pRender->Update(1.0f / ImGui::GetIO().Framerate);
             static bool bIsPlaying;
             bIsPlaying = pRender->IsPlaying();
