@@ -28,10 +28,13 @@ include_directories(${FFMPEG_INCLUDE_DIR})
 
 
 if (UNIX)
+    set (CMAKE_CXX_COMPILER "g++-8")
     set (CMAKE_CXX_FLAGS "-std=c++17 -Wall -pthread -Wno-missing-braces -g")
     set (CMAKE_CXX_DEBUG_FLAGS ${CMAKE_CXX_FLAGS} "")
     set (CMAKE_CXX_RELEASE_FLAGS ${CMAKE_CXX_FLAGS} "-O3")
-    set (CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-linux-gnu/8/") # force gcc8's dir
+    if (NOT APPLE)
+        set (CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-linux-gnu/8/") # force gcc8's dir
+    endif()
 elseif(MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /W4")
 endif()
@@ -63,9 +66,18 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 #add_library(videoplayer src/videoplayer.cpp)
 #target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
-find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
 add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp)
-target_link_libraries(OpenRaceRender imgui glfw gl3w ${CPPFS})
+
+target_link_libraries(OpenRaceRender imgui glfw gl3w)
+
+if (NOT APPLE)
+find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
+find_library(MPV NAMES "libmpv.so" PATHS "${CMAKE_SOURCE_DIR}/thirdparty/libmpv/" "/usr/local/lib")
+target_link_libraries(OpenRaceRender ${CPPFS})
+else()
+find_library(MPV NAMES "libmpv.dylib" PATHS "/usr/local/lib")
+endif()
+
 
 enable_testing()
 add_executable(logtest src/test/testreader.cpp src/logreader.cpp)
@@ -78,8 +90,6 @@ add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-17
 ########################
 # Test different libraries
 add_executable(mpvtest src/test/testmpv.cpp)
-find_library(MPV NAMES "libmpv.so" "libmpv.dylib" PATHS "/home/qgu/tmp/mpv-build/mpv/build" "/usr/local/lib")
-message(STATUS ${MPV})
 
 target_link_libraries(OpenRaceRender ${MPV})
 
