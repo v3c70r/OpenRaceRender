@@ -72,8 +72,10 @@ target_link_libraries(OpenRaceRender imgui glfw gl3w)
 
 if (NOT APPLE)
 find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
-find_library(MPV NAMES "libmpv.so" PATHS "${CMAKE_SOURCE_DIR}/thirdparty/libmpv/" "/usr/local/lib")
+#find_library(MPV NAMES "libmpv.so" PATHS "${CMAKE_SOURCE_DIR}/thirdparty/libmpv/" "/usr/local/lib")
+find_package(MPV REQUIRED)
 target_link_libraries(OpenRaceRender ${CPPFS})
+include_directories(${MPV_INCLUDE_PATH})
 else()
 find_library(MPV NAMES "libmpv.dylib" PATHS "/usr/local/lib")
 endif()
@@ -91,9 +93,9 @@ add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-17
 # Test different libraries
 add_executable(mpvtest src/test/testmpv.cpp)
 
-target_link_libraries(OpenRaceRender ${MPV})
+target_link_libraries(OpenRaceRender ${MPV_LIBRARY})
 
-target_link_libraries(mpvtest ${MPV})
+target_link_libraries(mpvtest ${MPV_LIBRARY})
 #add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")
 
 # test video decoder 

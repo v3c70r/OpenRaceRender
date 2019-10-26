@@ -1,8 +1,8 @@
 #pragma once
 
 extern "C"{
-#include <libmpv/client.h>
-#include <libmpv/render_gl.h>
+#include <mpv/client.h>
+#include <mpv/render_gl.h>
 }
 #include <string>
 #include <cassert>

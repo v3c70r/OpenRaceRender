@@ -153,6 +153,7 @@ int main(int argc, char** argv)
                 pRender = std::make_unique<LogRender>(*pReader);
             }
             fileDialg.openDialog();
+            fileDialg.draw();
         }
         else
         {
@@ -168,12 +169,11 @@ int main(int argc, char** argv)
             pRender->DrawAcceBox();
             pRender->DrawMap();
             pRender->Update(1.0f / ImGui::GetIO().Framerate);
+            static bool bIsPlaying;
+            bIsPlaying = pRender->IsPlaying();
+            videoPlayer.SetPlaying(bIsPlaying);
         }
-        fileDialg.draw();
 
-        static bool bIsPlaying;
-        bIsPlaying = pRender->IsPlaying();
-        videoPlayer.SetPlaying(bIsPlaying);
         if (show_demo_window)
         {
             ImGui::ShowMetricsWindow(&show_demo_window);
