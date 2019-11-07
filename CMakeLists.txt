@@ -28,11 +28,11 @@ include_directories(${FFMPEG_INCLUDE_DIR})
 
 
 if (UNIX)
-    set (CMAKE_CXX_COMPILER "g++-8")
     set (CMAKE_CXX_FLAGS "-std=c++17 -Wall -pthread -Wno-missing-braces -g")
     set (CMAKE_CXX_DEBUG_FLAGS ${CMAKE_CXX_FLAGS} "")
     set (CMAKE_CXX_RELEASE_FLAGS ${CMAKE_CXX_FLAGS} "-O3")
     if (NOT APPLE)
+        set (CMAKE_CXX_COMPILER "g++-8")
         set (CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-linux-gnu/8/") # force gcc8's dir
     endif()
 elseif(MSVC)
@@ -69,11 +69,10 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp)
 
 target_link_libraries(OpenRaceRender imgui glfw gl3w)
-
+find_package(MPV REQUIRED)
 if (NOT APPLE)
 find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
 #find_library(MPV NAMES "libmpv.so" PATHS "${CMAKE_SOURCE_DIR}/thirdparty/libmpv/" "/usr/local/lib")
-find_package(MPV REQUIRED)
 target_link_libraries(OpenRaceRender ${CPPFS})
 include_directories(${MPV_INCLUDE_PATH})
 else()
