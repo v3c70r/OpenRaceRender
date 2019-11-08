@@ -21,6 +21,7 @@ LogReader::LogReader(const std::string& fileName)
     std::string line;
     size_t lineCount = 0;
     bool isHeaderVisited = false;
+    int nPreviousLap = 0;
     while (!recordFile.eof())
     {
         std::getline(recordFile, line);
@@ -48,8 +49,16 @@ LogReader::LogReader(const std::string& fileName)
                 if (line.size() > 0)
                 {
                     std::vector<float> rec = SplitFloats(line);
-                    const float& timestamp = rec[0];
-                    m_vRecords.emplace_back(rec[0], rec);
+                    const float& timestamp = rec[TIME_IDX];
+
+                    const int nLap = (int)rec[LAP_IDX];
+                    if (m_vLapStartIndex.empty() || nLap != nPreviousLap)
+                    {
+                        m_vLapStartIndex.push_back(m_vRecords.size());
+                        nPreviousLap = nLap;
+
+                    }
+                    m_vRecords.emplace_back(rec[TIME_IDX], rec);
 
                     // update min max values
                     m_minRecord.timestamp = timestamp < m_minRecord.timestamp
@@ -81,6 +90,11 @@ LogReader::LogReader(const std::string& fileName)
 std::string LogReader::GetDebugStr() const
 {
     std::stringstream ss;
+    // Debug lap start indices
+    for (size_t i = 0; i < m_vLapStartIndex.size(); i++)
+    {
+        ss <<i<<"\t"<<m_vLapStartIndex[i]<<std::endl;
+    }
     for (const auto& comment : m_vComments)
     {
         ss << comment.first << "\t" << comment.second << "\n";
@@ -145,6 +159,17 @@ std::vector<SVec2> LogReader::GetNormalizedTrajectory() const
         res.push_back((point - m_boundingBox.lower) / fScale);
     }
     return res;
+}
+
+std::vector<RaceRecord> LogReader::GetLapRecords(size_t nLap) const
+{
+    std::vector<RaceRecord>::const_iterator begin =
+        m_vRecords.begin() + m_vLapStartIndex[nLap];
+    std::vector<RaceRecord>::const_iterator end =
+        nLap == m_vLapStartIndex.size() - 1
+            ? m_vRecords.end()
+            : m_vRecords.begin() + m_vLapStartIndex[nLap + 1];
+    return std::vector<RaceRecord>(begin, end);
 }
 
 //////////////////////////////////////////////////////////

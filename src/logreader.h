@@ -47,6 +47,11 @@ public:
     SAABB GetAABB() const { return m_boundingBox; }
     const std::vector<SVec2>& GetTrajectory() const { return m_vTrajectory;}
     std::vector<SVec2> GetNormalizedTrajectory() const;
+
+    size_t GetNumberOfLaps() const { return m_vLapStartIndex.size(); }
+    std::vector<RaceRecord> GetLapRecords(size_t nLap) const;
+    
+
 private:
     void UpdateTrajectory();
     static std::vector<std::string> SplitString(const std::string& input, char delimiter = ',');
@@ -57,10 +62,15 @@ private:
     std::vector<LinedComment> m_vComments;
     std::vector<std::string> m_vHeaders;
     std::vector<RaceRecord> m_vRecords;
+    std::vector<size_t> m_vLapStartIndex;   // Indicates the starting and end index of the record in each lap
 
     RaceRecord m_minRecord; // Contains all of the min values for each items
     RaceRecord m_maxRecord; // Contains all of the max values for each items
     SAABB m_boundingBox;
     std::vector<SVec2> m_vTrajectory;
+
+    // Hardcoded lap and time index in the record
+    const int TIME_IDX = 0;
+    const int LAP_IDX = 2;
 };
 
