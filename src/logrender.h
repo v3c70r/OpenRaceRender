@@ -6,7 +6,6 @@ public:
     LogRender(const LogReader& LogReader);
 
 // Draw functions for different boxes
-    void DrawDataBox();
     void DrawBasicInfoBox();
     float DrawTimeSlider();
     void DrawAcceBox();
@@ -28,7 +27,6 @@ public:
     {
         return m_bIsPlaying;
     }
-
 
 private:
     const LogReader& m_logReader;

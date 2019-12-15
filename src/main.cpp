@@ -13,6 +13,7 @@
 
 #include "logreader.h"
 #include "logrender.h"
+#include "debugrender.h"
 #include "videoplayermpv.h"
 
 #include <GL/gl3w.h>    // Initialize with gl3wInit()
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
     std::string sVideoFile;
     std::unique_ptr<LogReader> pReader = nullptr;
     std::unique_ptr<LogRender> pRender = nullptr;
+    std::unique_ptr<DebugRender> pDebugRender = nullptr;
     VideoPlayerMPV videoPlayer;
     if (argc > 2)
     {
@@ -122,6 +124,8 @@ int main(int argc, char** argv)
         {
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
+            pDebugRender = std::make_unique<DebugRender>(*pReader);
+
         }
         if (argc == 3)
         {
@@ -161,13 +165,15 @@ int main(int argc, char** argv)
                 {
                     pReader = std::make_unique<LogReader>(selectedFiles[0]);
                     pRender = std::make_unique<LogRender>(*pReader);
+                    pDebugRender = std::make_unique<DebugRender>(*pReader);
+                    pRender = std::make_unique<LogRender>(*pReader);
                 }
             }
         }
         else
         {
             ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
-            pRender->DrawDataBox();
+            pDebugRender->DrawDataBox();
             static float fSeekTime = -1.0;
             fSeekTime = pRender->DrawTimeSlider();
             if (fSeekTime > 0.0)
