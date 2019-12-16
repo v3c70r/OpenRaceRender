@@ -166,7 +166,6 @@ int main(int argc, char** argv)
                     pReader = std::make_unique<LogReader>(selectedFiles[0]);
                     pRender = std::make_unique<LogRender>(*pReader);
                     pDebugRender = std::make_unique<DebugRender>(*pReader);
-                    pRender = std::make_unique<LogRender>(*pReader);
                 }
             }
         }
@@ -175,15 +174,15 @@ int main(int argc, char** argv)
             ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
             pDebugRender->DrawDataBox();
             static float fSeekTime = -1.0;
-            fSeekTime = pRender->DrawTimeSlider();
+            //fSeekTime = pRender->DrawTimeSlider();
             if (fSeekTime > 0.0)
             {
                 videoPlayer.SetTime(fSeekTime);
             }
-            pRender->DrawBasicInfoBox();
-            pRender->DrawAcceBox();
+            //pRender->DrawBasicInfoBox();
+            //pRender->DrawAcceBox();
             //pRender->DrawMap();
-            pRender->Update(1.0f / ImGui::GetIO().Framerate);
+            //pRender->Update(1.0f / ImGui::GetIO().Framerate);
             static bool bIsPlaying;
             bIsPlaying = pRender->IsPlaying();
             videoPlayer.SetPlaying(bIsPlaying);
