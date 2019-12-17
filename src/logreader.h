@@ -37,6 +37,8 @@ public:
     const std::vector<std::string>& GetHeaders() const { return m_vHeaders;}
     RaceRecord GetInterpolatedRecord(float timestamp) const;
     const RaceRecord& GetLowerBoundRecord(float timestamp) const;
+    const RaceRecord& GetRecord(size_t idx) const {return m_vRecords.at(idx);}
+    size_t GetRecordSize() const{return m_vRecords.size();}
 
     float GetMinTimeStamp() const { return m_minRecord.timestamp; }
     float GetMaxTimeStamp() const { return m_maxRecord.timestamp; }
