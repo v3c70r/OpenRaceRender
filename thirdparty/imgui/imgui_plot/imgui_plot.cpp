@@ -209,6 +209,8 @@ PlotStatus Plot(const char* label, const PlotConfig& conf) {
         }
 
         if (conf.selection.show) {
+            static bool bIsMovingSelection = false;
+            static int nMovingStart = 0;
             if (hovered) {
                 if (g.IO.MouseClicked[0]) {
                     SetActiveID(id, window);
@@ -216,13 +218,27 @@ PlotStatus Plot(const char* label, const PlotConfig& conf) {
 
                     const int v_idx = cursor_to_idx(g.IO.MousePos, inner_bb, conf, x_min, x_max);
                     uint32_t start = conf.values.offset + (v_idx % conf.values.count);
-                    uint32_t end = start;
-                    if (conf.selection.sanitize_fn)
-                        end = conf.selection.sanitize_fn(end - start) + start;
-                    if (end < conf.values.offset + conf.values.count) {
-                        *conf.selection.start = start;
-                        *conf.selection.length = end - start;
-                        status = PlotStatus::selection_updated;
+                    if (start < *conf.selection.start || start > *conf.selection.start + *conf.selection.length)
+                    {
+
+                        // Start selection
+                        uint32_t end = start;
+                        if (conf.selection.sanitize_fn)
+                            end = conf.selection.sanitize_fn(end - start) + start;
+                        if (end < conf.values.offset + conf.values.count)
+                        {
+                            *conf.selection.start = start;
+                            *conf.selection.length = end - start;
+                            status = PlotStatus::selection_updated;
+                        }
+                        bIsMovingSelection = false;
+                        nMovingStart = 0;
+                    }
+                    else
+                    {
+                        // Start moving selection
+                        nMovingStart = start;
+                        bIsMovingSelection = true;
                     }
                 }
             }
@@ -230,14 +246,33 @@ PlotStatus Plot(const char* label, const PlotConfig& conf) {
             if (g.ActiveId == id) {
                 if (g.IO.MouseDown[0]) {
                     const int v_idx = cursor_to_idx(g.IO.MousePos, inner_bb, conf, x_min, x_max);
-                    const uint32_t start = *conf.selection.start;
                     uint32_t end = conf.values.offset + (v_idx % conf.values.count);
-                    if (end > start) {
-                        if (conf.selection.sanitize_fn)
-                            end = conf.selection.sanitize_fn(end - start) + start;
-                        if (end < conf.values.offset + conf.values.count) {
-                            *conf.selection.length = end - start;
+                    if (!bIsMovingSelection)
+                    {
+                        // Dragging end of selection
+                        const uint32_t start = *conf.selection.start;
+                        if (end > start)
+                        {
+                            if (conf.selection.sanitize_fn)
+                                end = conf.selection.sanitize_fn(end - start) + start;
+                            if (end < conf.values.offset + conf.values.count)
+                            {
+                                *conf.selection.length = end - start;
+                                status = PlotStatus::selection_updated;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Moving selection
+                        int nNewPos = *conf.selection.start + (end - nMovingStart);
+                        nNewPos = std::max(nNewPos, 0);
+                        nNewPos = std::min(nNewPos, (int)(conf.values.offset + conf.values.count - *conf.selection.length - 1));
+                        if (nNewPos != *conf.selection.start)
+                        {
+                            *conf.selection.start = nNewPos;
                             status = PlotStatus::selection_updated;
+                            nMovingStart = end;
                         }
                     }
                 } else {
