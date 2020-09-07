@@ -9,6 +9,9 @@ struct RaceRecord
         : timestamp(ts), values(vs)
     {
     }
+    bool operator<(const RaceRecord& other) const {
+        return this->timestamp < other.timestamp;
+    }
 };
 
 
@@ -49,6 +52,7 @@ public:
     SAABB GetAABB() const { return m_boundingBox; }
     const std::vector<SVec2>& GetTrajectory() const { return m_vTrajectory;}
     std::vector<SVec2> GetNormalizedTrajectory() const;
+    SVec2 GetNormalizedPosition(const SVec2& pos) const;
 
     size_t GetNumberOfLaps() const { return m_vLapStartIndex.size(); }
     std::vector<RaceRecord> GetLapRecords(size_t nLap) const;

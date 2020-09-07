@@ -1,11 +1,12 @@
 #include "logreader.h"
 #include <limits>
 #include <sstream>
+#include <cassert>
 
-bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
-{
-    return thisRec.timestamp < other.timestamp;
-}
+//bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
+//{
+//    return thisRec.timestamp < other.timestamp;
+//}
 bool operator<(const RaceRecord& thisRec, const float& otherTimestamp)
 {
     return thisRec.timestamp < otherTimestamp;
@@ -58,7 +59,7 @@ LogReader::LogReader(const std::string& fileName)
                         nPreviousLap = nLap;
 
                     }
-                    m_vRecords.emplace_back(rec[TIME_IDX], rec);
+                    m_vRecords.emplace_back(timestamp, rec);
 
                     // update min max values
                     m_minRecord.timestamp = timestamp < m_minRecord.timestamp
@@ -122,14 +123,16 @@ std::string LogReader::GetDebugStr() const
 RaceRecord LogReader::GetInterpolatedRecord(float timestamp) const
 {
     auto source =
-        std::lower_bound(m_vRecords.begin(), m_vRecords.end(), timestamp);
+        std::lower_bound(m_vRecords.begin() + 1, m_vRecords.end(), timestamp) - 1;
     RaceRecord res = RaceRecord(timestamp, source->values);
+    assert(source->timestamp <= timestamp);
     // Return last one if the value is greater than last
     if (source == m_vRecords.end()) return res;
 
-    auto target = source++;
+    auto target = source+1;
     float ratio = (timestamp - source->timestamp) /
                   (target->timestamp - source->timestamp);
+    assert(ratio >= 0.0);
     for (size_t i = 0; i < source->values.size(); i++)
     {
         res.values[i] =
@@ -140,10 +143,11 @@ RaceRecord LogReader::GetInterpolatedRecord(float timestamp) const
 
 const RaceRecord& LogReader::GetLowerBoundRecord(float timestamp) const
 {
-    if (timestamp > m_minRecord.timestamp || timestamp < m_maxRecord.timestamp)
+    if (timestamp < m_minRecord.timestamp || timestamp > m_maxRecord.timestamp)
         return *m_vRecords.begin();
 
-    auto it = std::lower_bound(m_vRecords.begin(), m_vRecords.end(), timestamp);
+    RaceRecord lowerBoundRecord = {timestamp, std::vector<float>()};
+    auto it = std::lower_bound(m_vRecords.begin(), m_vRecords.end(), lowerBoundRecord);
     return *it;
 }
 
@@ -159,6 +163,13 @@ std::vector<SVec2> LogReader::GetNormalizedTrajectory() const
         res.push_back((point - m_boundingBox.lower) / fScale);
     }
     return res;
+}
+SVec2 LogReader::GetNormalizedPosition(const SVec2 &pos) const
+{
+    float fXScale = m_boundingBox.upper.x - m_boundingBox.lower.x;
+    float fYScale = m_boundingBox.upper.y - m_boundingBox.lower.y;
+    float fScale = std::max(fYScale, fXScale);
+    return SVec2(pos - m_boundingBox.lower)/fScale ;
 }
 
 std::vector<RaceRecord> LogReader::GetLapRecords(size_t nLap) const

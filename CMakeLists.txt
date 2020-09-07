@@ -23,18 +23,17 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 find_package(FFMPEG REQUIRED)
 include_directories(${FFMPEG_INCLUDE_DIR})
 
-#find_package(MPV REQUIRED)
-#include_directories(${MPV_INCLUDE_DIR})
-
+include_directories(thirdparty/stb)
+add_library(stb thirdparty/stb/stb_image_write.cpp)
 
 if (UNIX)
     set (CMAKE_CXX_FLAGS "-std=c++17 -Wall -pthread -Wno-missing-braces -g")
     set (CMAKE_CXX_DEBUG_FLAGS ${CMAKE_CXX_FLAGS} "")
     set (CMAKE_CXX_RELEASE_FLAGS ${CMAKE_CXX_FLAGS} "-O3")
-    if (NOT APPLE)
-        set (CMAKE_CXX_COMPILER "g++-8")
-        set (CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-linux-gnu/8/") # force gcc8's dir
-    endif()
+    #if (NOT APPLE)
+    #    set (CMAKE_CXX_COMPILER "g++-8")
+    #    set (CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-linux-gnu/8/") # force gcc8's dir
+    #endif()
 elseif(MSVC)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /W4")
 endif()
@@ -66,17 +65,17 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 #add_library(videoplayer src/videoplayer.cpp)
 #target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
-add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/videoplayermpv.cpp src/debugrender.cpp)
+add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/debugrender.cpp)
 
 target_link_libraries(OpenRaceRender imgui glfw gl3w)
-find_package(MPV REQUIRED)
+#find_package(MPV REQUIRED)
 if (NOT APPLE)
-find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
+    #find_library(CPPFS NAMES "libstdc++fs.a" PATHS "/usr/lib/gcc/x86_64-linux-gnu/8/")
 #find_library(MPV NAMES "libmpv.so" PATHS "${CMAKE_SOURCE_DIR}/thirdparty/libmpv/" "/usr/local/lib")
-target_link_libraries(OpenRaceRender ${CPPFS})
-include_directories(${MPV_INCLUDE_PATH})
+#target_link_libraries(OpenRaceRender ${CPPFS})
+#include_directories(${MPV_INCLUDE_PATH})
 else()
-find_library(MPV NAMES "libmpv.dylib" PATHS "/usr/local/lib")
+    #find_library(MPV NAMES "libmpv.dylib" PATHS "/usr/local/lib")
 endif()
 
 
@@ -90,11 +89,11 @@ add_test(NAME LogReader COMMAND logtest "${CMAKE_SOURCE_DIR}/raw/Log-20190902-17
 
 ########################
 # Test different libraries
-add_executable(mpvtest src/test/testmpv.cpp)
+#add_executable(mpvtest src/test/testmpv.cpp)
 
-target_link_libraries(OpenRaceRender ${MPV_LIBRARY})
+target_link_libraries(OpenRaceRender stb)
 
-target_link_libraries(mpvtest ${MPV_LIBRARY})
+#target_link_libraries(mpvtest)
 #add_test(NAME VideoDecoder COMMAND decodertest "${CMAKE_SOURCE_DIR}/raw/sample.mp4")
 
 # test video decoder 

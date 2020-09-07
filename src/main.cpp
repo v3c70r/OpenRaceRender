@@ -14,11 +14,11 @@
 #include "logreader.h"
 #include "logrender.h"
 #include "debugrender.h"
-#include "videoplayermpv.h"
 
 #include <GL/gl3w.h>    // Initialize with gl3wInit()
 
 #include <GLFW/glfw3.h>
+#include <stb_image_write.h>
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 
     // Our state
     bool show_demo_window = true;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.00f);
 
     /////////////////// Create my stuff
     PCSX::Widgets::FileDialog fileDialg(GetTitle);
@@ -116,8 +116,7 @@ int main(int argc, char** argv)
     std::unique_ptr<LogReader> pReader = nullptr;
     std::unique_ptr<LogRender> pRender = nullptr;
     std::unique_ptr<DebugRender> pDebugRender = nullptr;
-    VideoPlayerMPV videoPlayer;
-    if (argc > 2)
+    if (argc == 2)
     {
         sLogFile = argv[1];
         if (std::filesystem::exists(std::filesystem::path(sLogFile)))
@@ -125,21 +124,22 @@ int main(int argc, char** argv)
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
             pDebugRender = std::make_unique<DebugRender>(*pReader);
-
-        }
-        if (argc == 3)
-        {
-            sVideoFile = argv[2];
-            if (std::filesystem::exists(std::filesystem::path(sVideoFile)))
-            {
-                videoPlayer.LoadVideo(sVideoFile);
-            }
         }
     }
 
-    videoPlayer.InitGLContext(GetProcAddress);
+    struct SRecordInfo
+    {
+        bool bIsRecording = false;
+        bool bIsContextInitialized = false;
+        uint32_t nWidth = 1920;
+        uint32_t nHeight = 1080;
+        uint32_t nFrameCount = 0;
+        float fFPS = 30.0f;
+    } recordInfo;
+
     /////////////////// 
     // Main loop
+    std::unique_ptr<uint8_t[]> data;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
         ImGui::PushFont(pRoboto);
 
         ////////////////////////////////
-        if (pReader == nullptr)
+        if (pReader == nullptr) // Show loading screen
         {
             fileDialg.openDialog();
             if (fileDialg.draw())
@@ -171,28 +171,66 @@ int main(int argc, char** argv)
         }
         else
         {
-            ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
-            pDebugRender->DrawDataBox();
-            static float fSeekTime = -1.0;
-            //fSeekTime = pRender->DrawTimeSlider();
-            if (fSeekTime > 0.0)
+            if (!recordInfo.bIsRecording)
             {
-                videoPlayer.SetTime(fSeekTime);
+                if (ImGui::Button("Record"))
+                {
+                    recordInfo.bIsRecording = true;
+                    recordInfo.bIsContextInitialized = false;
+                }
+                ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
+                pDebugRender->DrawDataBox();
+                static float fSeekTime = -1.0;
+                fSeekTime = pRender->DrawTimeSlider();
+                pRender->DrawBasicInfoBox();
+                pRender->DrawAcceBox();
+                pRender->DrawMap();
+                pRender->Update(1.0f / ImGui::GetIO().Framerate);
+                static bool bIsPlaying;
+                bIsPlaying = pRender->IsPlaying();
             }
-            //pRender->DrawBasicInfoBox();
-            //pRender->DrawAcceBox();
-            //pRender->DrawMap();
-            //pRender->Update(1.0f / ImGui::GetIO().Framerate);
-            static bool bIsPlaying;
-            bIsPlaying = pRender->IsPlaying();
-            videoPlayer.SetPlaying(bIsPlaying);
+            else
+            {
+                // Handle recording
+                if (ImGui::Button("Stop"))
+                {
+                    recordInfo.bIsRecording = false;
+                }
+                if (!recordInfo.bIsContextInitialized)
+                {
+                    // Initialize recording context
+                    glfwSetWindowSize(window, recordInfo.nWidth, recordInfo.nHeight);
+                    recordInfo.nFrameCount = 0;
+                    data = std::make_unique<uint8_t[]>(recordInfo.nWidth * recordInfo.nWidth * 8);
+                    pRender->SetTime(0.0f);
+                    pRender->SetPlaying(true);
+
+                    recordInfo.bIsContextInitialized = true;
+                }
+                // Render boxes
+                {
+                    pRender->DrawBasicInfoBox();
+                    pRender->DrawMap();
+                    pRender->DrawAcceBox();
+                    pRender->Update(1.0f / recordInfo.fFPS);
+                }
+                glReadPixels(0, 0, recordInfo.nWidth, recordInfo.nHeight,
+                             GL_RGBA, GL_UNSIGNED_BYTE, data.get());
+
+                static char fileName[20];
+                sprintf(fileName, "output/out_%05d.png", recordInfo.nFrameCount);
+                stbi_write_png(fileName, recordInfo.nWidth,
+                               recordInfo.nHeight, 4, data.get(),
+                               sizeof(uint8_t) * 4 * recordInfo.nWidth);
+                recordInfo.nFrameCount++;
+            }
         }
 
-        if (show_demo_window)
-        {
-            ImGui::ShowMetricsWindow(&show_demo_window);
-            ImGui::ShowDemoWindow(&show_demo_window);
-        }
+        //if (show_demo_window)
+        //{
+        //    ImGui::ShowMetricsWindow(&show_demo_window);
+        //    ImGui::ShowDemoWindow(&show_demo_window);
+        //}
         ImGui::PopFont();
 
         // Rendering
@@ -203,7 +241,6 @@ int main(int argc, char** argv)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        videoPlayer.Render(0, display_w, display_h); 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
@@ -213,8 +250,6 @@ int main(int argc, char** argv)
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
-    videoPlayer.DestroyGLContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();

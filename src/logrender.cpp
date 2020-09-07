@@ -38,13 +38,24 @@ void LogRender::DrawMap()
     std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
     for (int i = 0; i < normalizedPoints.size() - 1; i += 2)
     {
-        ImVec2 point0(normalizedPoints[i].x * 500.0, normalizedPoints[i].y * 500.0);
-        ImVec2 point1(normalizedPoints[i + 1].x * 500.0, normalizedPoints[i + 1].y * 500.0);
+        ImVec2 point0(normalizedPoints[i].x * 300.0, normalizedPoints[i].y * 300.0);
+        ImVec2 point1(normalizedPoints[i + 1].x * 300.0, normalizedPoints[i + 1].y * 300.0);
         draw_list->AddLine(
             ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
             ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
             IM_COL32(255, 255, 0, 255), 2.0f);
     }
+    // Plot the position
+    RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
+
+    int nLongitudeIdx = 8;   // x
+    int nLatitudeIdx = 7;    //y
+    SVec2 normalizedPos = m_logReader.GetNormalizedPosition(
+        {rec.values[nLongitudeIdx], rec.values[nLatitudeIdx]});
+
+    draw_list->AddCircle(ImVec2(canvas_pos.x + normalizedPos.x * 300,
+                                canvas_pos.y + normalizedPos.y * 300),
+                         3.0f, 0xFF0000FF, 50, 1.0f);
 
     ImGui::End();
 }

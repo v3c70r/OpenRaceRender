@@ -14,6 +14,12 @@ public:
         m_bIsPlaying = !m_bIsPlaying;
     }
 
+    void SetPlaying(bool bIsPlaying)
+    {
+        m_bIsPlaying = bIsPlaying;
+    }
+
+
     void DrawRevBox();
     void DrawThrottleBrakeBox();
     void DrawMap();
@@ -26,6 +32,10 @@ public:
     bool IsPlaying() const
     {
         return m_bIsPlaying;
+    }
+    void SetTime(float t)
+    {
+        m_fTime = t;
     }
 
 private:
