@@ -2,6 +2,7 @@
 #include <limits>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 //bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
 //{
@@ -122,15 +123,17 @@ std::string LogReader::GetDebugStr() const
 
 RaceRecord LogReader::GetInterpolatedRecord(float timestamp) const
 {
-    auto source =
-        std::lower_bound(m_vRecords.begin() + 1, m_vRecords.end(), timestamp) - 1;
+
+    auto target = std::lower_bound(m_vRecords.begin() + 1, m_vRecords.end(), timestamp);
+    auto source = target - 1;
+
+
     RaceRecord res = RaceRecord(timestamp, source->values);
     assert(source->timestamp <= timestamp);
     // Return last one if the value is greater than last
     if (source == m_vRecords.end()) return res;
 
-    auto target = source+1;
-    float ratio = (timestamp - source->timestamp) /
+    double ratio = (timestamp - source->timestamp) /
                   (target->timestamp - source->timestamp);
     assert(ratio >= 0.0);
     for (size_t i = 0; i < source->values.size(); i++)
@@ -189,17 +192,48 @@ void LogReader::UpdateTrajectory()
 {
     int nLongitudeIdx = 8;   // x
     int nLatitudeIdx = 7;    //y
+    int nGPSUpdateIdx = 5;  // 1.0 if GPS updated, otherwise, 0
     m_boundingBox = {
         {m_maxRecord.values[nLongitudeIdx], m_maxRecord.values[nLatitudeIdx]},
         {m_minRecord.values[nLongitudeIdx], m_minRecord.values[nLatitudeIdx]}
     };
     m_vTrajectory.clear();
     m_vTrajectory.reserve(m_vRecords.size());
-    for (const RaceRecord& rec: m_vRecords)
+    for (size_t i = 0 ; i < m_vRecords.size(); i++)
     {
+        RaceRecord& rec = m_vRecords[i];
+        const bool bIsGPSUpdated = (rec.values[nGPSUpdateIdx] > 0.5);
         float x = rec.values[nLongitudeIdx];
         float y = rec.values[nLatitudeIdx];
-        m_vTrajectory.push_back(SVec2({x, y}));
+        if (bIsGPSUpdated)
+        {
+            m_vTrajectory.push_back(SVec2({x, y}));
+        }
+        else
+        {
+            // Interpolate x, y position based on previous GPS update and next GPS update
+            RaceRecord& prevRec = rec;
+            RaceRecord& nextRec = rec;
+            for(size_t prevIdx = i - 1; prevIdx > 0; prevIdx--)
+            {
+                prevRec = m_vRecords[prevIdx];
+                if (prevRec.values[nGPSUpdateIdx] > 0.5) break;
+            }
+
+            for(size_t nextIdx = i + 1; nextIdx < m_vRecords.size(); nextIdx++)
+            {
+                nextRec = m_vRecords[nextIdx];
+                if (nextRec.values[nGPSUpdateIdx] > 0.5) break;
+            }
+            float ratio = (rec.timestamp - prevRec.timestamp) /
+                          fmax((nextRec.timestamp - prevRec.timestamp), 0.0001);
+            rec.values[nLongitudeIdx] = prevRec.values[nLongitudeIdx] +
+                                        ratio * (nextRec.values[nLongitudeIdx] -
+                                                 prevRec.values[nLongitudeIdx]);
+            rec.values[nLatitudeIdx] = prevRec.values[nLatitudeIdx] +
+                                        ratio * (nextRec.values[nLatitudeIdx] -
+                                                 prevRec.values[nLatitudeIdx]);
+        }
     }
 }
 //////////////////////////////////////////////////////////

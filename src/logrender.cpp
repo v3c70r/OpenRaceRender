@@ -3,13 +3,39 @@
 #include "logreader.h"
 #include <cstring>
 #include <array>
+#include <cmath>
 
 LogRender::LogRender(const LogReader& LogReader)
     : m_logReader(LogReader), m_fTime(m_logReader.GetMinTimeStamp())
 {
 }
 
-
+// Return true if is playing or can continue playing
+bool LogRender::Update(float dt)
+{
+    if (m_bIsPlaying)
+    {
+        m_fTime = fmax(m_fTime, m_logReader.GetMinTimeStamp());
+        if (m_fTime + dt < m_logReader.GetMaxTimeStamp())
+        {
+            m_fTime += dt;
+            return true;
+        }
+        else
+        {
+            if (m_bIsLooping)
+            {
+                m_fTime = m_logReader.GetMinTimeStamp();
+            }
+            else
+            {
+                m_bIsPlaying = false;
+            }
+            return false;
+        }
+    }
+    return false;
+}
 
 void LogRender::DrawThrottleBrakeBox()
 {
@@ -32,18 +58,19 @@ void DrawLapTime()
 
 void LogRender::DrawMap()
 {
+
     ImGui::Begin("Map");
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
     std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
-    for (int i = 0; i < normalizedPoints.size() - 1; i += 2)
+    for (size_t i = 0; i < normalizedPoints.size() - 1; i += 2)
     {
         ImVec2 point0(normalizedPoints[i].x * 300.0, normalizedPoints[i].y * 300.0);
         ImVec2 point1(normalizedPoints[i + 1].x * 300.0, normalizedPoints[i + 1].y * 300.0);
         draw_list->AddLine(
             ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
             ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
-            IM_COL32(255, 255, 0, 255), 2.0f);
+            IM_COL32(200, 200, 200, 255), 2.0f);
     }
     // Plot the position
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
@@ -55,8 +82,7 @@ void LogRender::DrawMap()
 
     draw_list->AddCircle(ImVec2(canvas_pos.x + normalizedPos.x * 300,
                                 canvas_pos.y + normalizedPos.y * 300),
-                         3.0f, 0xFF0000FF, 50, 1.0f);
-
+                         4.0f, 0xFF0000FF, 50, 4.0f);
     ImGui::End();
 }
 
@@ -136,10 +162,37 @@ float LogRender::DrawTimeSlider()
     }
     ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
     {
-        // Button
-        if (ImGui::Button("Play / Pause"))
+        if (m_bIsPlaying)
         {
-            TogglePlaying();
+            if (ImGui::Button("Pause"))
+            {
+                m_bIsPlaying = false;
+            }
+        }
+        else
+        {
+            if (ImGui::Button("Play"))
+            {
+                m_bIsPlaying = true;
+            }
+        }
+    }
+    ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+    {
+    // Button
+        if (m_bIsLooping)
+        {
+            if (ImGui::Button("Disable Loop"))
+            {
+                m_bIsLooping = false;
+            }
+        }
+        else
+        {
+            if (ImGui::Button("Enable Loop"))
+            {
+                m_bIsLooping = true;
+            }
         }
     }
 

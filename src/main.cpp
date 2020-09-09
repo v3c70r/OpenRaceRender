@@ -19,6 +19,7 @@
 
 #include <GLFW/glfw3.h>
 #include <stb_image_write.h>
+#include <cmath>
 
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
@@ -131,10 +132,12 @@ int main(int argc, char** argv)
     {
         bool bIsRecording = false;
         bool bIsContextInitialized = false;
+        bool bIsFinished = false;
         uint32_t nWidth = 1920;
         uint32_t nHeight = 1080;
         uint32_t nFrameCount = 0;
         float fFPS = 30.0f;
+        float fElapsedTime = 0.0f;
     } recordInfo;
 
     /////////////////// 
@@ -173,10 +176,16 @@ int main(int argc, char** argv)
         {
             if (!recordInfo.bIsRecording)
             {
+                //ImGui::BeginChild(
+                //    "##Stop", ImVec2(0, 0), false,
+                //    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
                 if (ImGui::Button("Record"))
                 {
                     recordInfo.bIsRecording = true;
                     recordInfo.bIsContextInitialized = false;
+                    recordInfo.bIsFinished = false;
+                    recordInfo.fElapsedTime = 0.0f;
                 }
                 ImGui::Text("%s\n", pReader->GetDebugStr().c_str());
                 pDebugRender->DrawDataBox();
@@ -188,6 +197,16 @@ int main(int argc, char** argv)
                 pRender->Update(1.0f / ImGui::GetIO().Framerate);
                 static bool bIsPlaying;
                 bIsPlaying = pRender->IsPlaying();
+                //ImGui::EndChild();
+                if (recordInfo.bIsFinished)
+                {
+                    ImGui::Begin("Record summary");
+                    ImGui::Text("Recorded %d frames in %f seconds, %f FPS",
+                                recordInfo.nFrameCount, recordInfo.fElapsedTime,
+                                recordInfo.nFrameCount /
+                                    fmax(recordInfo.fElapsedTime, 0.0001));
+                    ImGui::End();
+                }
             }
             else
             {
@@ -195,6 +214,7 @@ int main(int argc, char** argv)
                 if (ImGui::Button("Stop"))
                 {
                     recordInfo.bIsRecording = false;
+                    pRender->SetPlaying(false);
                 }
                 if (!recordInfo.bIsContextInitialized)
                 {
@@ -204,6 +224,7 @@ int main(int argc, char** argv)
                     data = std::make_unique<uint8_t[]>(recordInfo.nWidth * recordInfo.nWidth * 8);
                     pRender->SetTime(0.0f);
                     pRender->SetPlaying(true);
+                    pRender->SetLooping(false);
 
                     recordInfo.bIsContextInitialized = true;
                 }
@@ -212,7 +233,12 @@ int main(int argc, char** argv)
                     pRender->DrawBasicInfoBox();
                     pRender->DrawMap();
                     pRender->DrawAcceBox();
-                    pRender->Update(1.0f / recordInfo.fFPS);
+                    if(!pRender->Update(1.0f / recordInfo.fFPS))
+                    {
+                        recordInfo.bIsRecording = false;
+                        recordInfo.bIsFinished = true;
+                        pRender->SetPlaying(false);
+                    }
                 }
                 glReadPixels(0, 0, recordInfo.nWidth, recordInfo.nHeight,
                              GL_RGBA, GL_UNSIGNED_BYTE, data.get());
@@ -222,15 +248,11 @@ int main(int argc, char** argv)
                 stbi_write_png(fileName, recordInfo.nWidth,
                                recordInfo.nHeight, 4, data.get(),
                                sizeof(uint8_t) * 4 * recordInfo.nWidth);
+                recordInfo.fElapsedTime += ImGui::GetIO().DeltaTime;
                 recordInfo.nFrameCount++;
             }
         }
 
-        //if (show_demo_window)
-        //{
-        //    ImGui::ShowMetricsWindow(&show_demo_window);
-        //    ImGui::ShowDemoWindow(&show_demo_window);
-        //}
         ImGui::PopFont();
 
         // Rendering

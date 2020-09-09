@@ -9,25 +9,23 @@ public:
     void DrawBasicInfoBox();
     float DrawTimeSlider();
     void DrawAcceBox();
-    void TogglePlaying()
-    {
-        m_bIsPlaying = !m_bIsPlaying;
-    }
 
     void SetPlaying(bool bIsPlaying)
     {
         m_bIsPlaying = bIsPlaying;
     }
 
+    void SetLooping(bool bIsLooping)
+    {
+        m_bIsLooping = bIsLooping;
+    }
 
     void DrawRevBox();
     void DrawThrottleBrakeBox();
     void DrawMap();
 
-    void Update(float dt)
-    {
-        if (m_bIsPlaying) m_fTime += dt;
-    }
+    bool Update(float dt);
+    
 
     bool IsPlaying() const
     {
@@ -41,5 +39,6 @@ public:
 private:
     const LogReader& m_logReader;
     bool m_bIsPlaying = false;
+    bool m_bIsLooping = false;
     float m_fTime;
 };
