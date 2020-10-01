@@ -9,9 +9,14 @@ struct RaceRecord
         : timestamp(ts), values(vs)
     {
     }
-    bool operator<(const RaceRecord& other) const {
-        return this->timestamp < other.timestamp;
-    }
+    //bool operator<(const RaceRecord& other) const
+    //{
+    //    return this->timestamp < other.timestamp;
+    //}
+    //bool operator<(const RaceRecord& thisRec, const float& otherTimestamp)
+    //{
+    //    return thisRec.timestamp < otherTimestamp;
+    //}
 };
 
 

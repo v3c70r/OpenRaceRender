@@ -4,10 +4,10 @@
 #include <cassert>
 #include <cmath>
 
-//bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
-//{
-//    return thisRec.timestamp < other.timestamp;
-//}
+bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
+{
+    return thisRec.timestamp < other.timestamp;
+}
 bool operator<(const RaceRecord& thisRec, const float& otherTimestamp)
 {
     return thisRec.timestamp < otherTimestamp;

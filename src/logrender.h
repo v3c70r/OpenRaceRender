@@ -1,5 +1,8 @@
 #pragma once
+#include <map>
+#include <memory>
 class LogReader;
+class Widget;
 class LogRender
 {
 public:
@@ -8,7 +11,6 @@ public:
 // Draw functions for different boxes
     void DrawBasicInfoBox();
     float DrawTimeSlider();
-    void DrawAcceBox();
 
     void SetPlaying(bool bIsPlaying)
     {
@@ -36,9 +38,27 @@ public:
         m_fTime = t;
     }
 
+    template<typename T>
+    void RegisterWidget(const std::string& name)
+    {
+        //m_mpRegisteredWidgets[name] = std::make_unique<T>(name);
+        m_mpRegisteredWidgets.insert(std::make_pair(0,  nullptr));
+    }
+
+    void UnRegisterWidget(const std::string& name)
+    {
+        m_mpRegisteredWidgets.erase(0);
+    }
+
+    void DrawWidgets() const;
+    
+
 private:
     const LogReader& m_logReader;
     bool m_bIsPlaying = false;
     bool m_bIsLooping = false;
     float m_fTime;
+    std::map<int, std::unique_ptr<Widget>> m_mpRegisteredWidgets;
 };
+
+

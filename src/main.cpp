@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <memory>
 #include <string>
+#include "widget.h"
 
 
 #include "logreader.h"
@@ -128,6 +129,9 @@ int main(int argc, char** argv)
         }
     }
 
+    // Register widgets
+    pRender->RegisterWidget<AccelorationWidget>("Acc");
+
     struct SRecordInfo
     {
         bool bIsRecording = false;
@@ -191,9 +195,11 @@ int main(int argc, char** argv)
                 pDebugRender->DrawDataBox();
                 static float fSeekTime = -1.0;
                 fSeekTime = pRender->DrawTimeSlider();
+
                 pRender->DrawBasicInfoBox();
-                pRender->DrawAcceBox();
                 pRender->DrawMap();
+
+                pRender->DrawWidgets();
                 pRender->Update(1.0f / ImGui::GetIO().Framerate);
                 static bool bIsPlaying;
                 bIsPlaying = pRender->IsPlaying();
@@ -232,7 +238,8 @@ int main(int argc, char** argv)
                 {
                     pRender->DrawBasicInfoBox();
                     pRender->DrawMap();
-                    pRender->DrawAcceBox();
+                    //pRender->DrawAcceBox();
+                    pRender->DrawWidgets();
                     if(!pRender->Update(1.0f / recordInfo.fFPS))
                     {
                         recordInfo.bIsRecording = false;
@@ -243,7 +250,7 @@ int main(int argc, char** argv)
                 glReadPixels(0, 0, recordInfo.nWidth, recordInfo.nHeight,
                              GL_RGBA, GL_UNSIGNED_BYTE, data.get());
 
-                static char fileName[20];
+                static char fileName[30];
                 sprintf(fileName, "output/out_%05d.png", recordInfo.nFrameCount);
                 stbi_write_png(fileName, recordInfo.nWidth,
                                recordInfo.nHeight, 4, data.get(),
