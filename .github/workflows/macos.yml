@@ -1,0 +1,21 @@
+name: MacOS
+
+on: [push]
+
+jobs:
+  build_macos:
+
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Update homebrew
+      run: brew update
+    - name: get submodules
+      run: git submodule update --init
+    - name: cmake
+      run: cmake .
+    - name: make
+      run: make
+    - name: test LogReader
+      run: make test

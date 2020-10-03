@@ -102,7 +102,7 @@ void LogRender::DrawBasicInfoBox()
     {
         const size_t ENGINE_SPEED_IDX = 21;
         char buf[32];
-        sprintf_s(buf, 32, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500.0f);
+        snprintf(buf, 32, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500.0f);
         float progress = rec.values[ENGINE_SPEED_IDX] / 9500.0f;
 
         ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), buf);
