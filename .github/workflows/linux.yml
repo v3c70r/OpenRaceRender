@@ -3,9 +3,9 @@ name: Linux
 on: [push]
 
 jobs:
-  build:
+  build_ubuntu_20.04:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     
     steps:
     - uses: actions/checkout@v1
