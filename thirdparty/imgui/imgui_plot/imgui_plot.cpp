@@ -266,8 +266,8 @@ PlotStatus Plot(const char* label, const PlotConfig& conf) {
                     {
                         // Moving selection
                         int nNewPos = *conf.selection.start + (end - nMovingStart);
-                        nNewPos = std::fmax(nNewPos, 0);
-                        nNewPos = std::fmin(nNewPos, (int)(conf.values.offset + conf.values.count - *conf.selection.length - 1));
+                        nNewPos = fmax(nNewPos, 0);
+                        nNewPos = fmin(nNewPos, (int)(conf.values.offset + conf.values.count - *conf.selection.length - 1));
                         if (nNewPos != *conf.selection.start)
                         {
                             *conf.selection.start = nNewPos;

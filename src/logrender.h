@@ -1,6 +1,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <string>
 class LogReader;
 class Widget;
 class LogRender
@@ -41,13 +42,12 @@ public:
     template<typename T>
     void RegisterWidget(const std::string& name)
     {
-        //m_mpRegisteredWidgets[name] = std::make_unique<T>(name);
-        m_mpRegisteredWidgets.insert(std::make_pair(0,  nullptr));
+        m_mpRegisteredWidgets[name] = std::make_unique<T>(name);
     }
 
     void UnRegisterWidget(const std::string& name)
     {
-        m_mpRegisteredWidgets.erase(0);
+        m_mpRegisteredWidgets.erase(name);
     }
 
     void DrawWidgets() const;
@@ -58,7 +58,7 @@ private:
     bool m_bIsPlaying = false;
     bool m_bIsLooping = false;
     float m_fTime;
-    std::map<int, std::unique_ptr<Widget>> m_mpRegisteredWidgets;
+    std::map<std::string, std::unique_ptr<Widget>> m_mpRegisteredWidgets;
 };
 
 

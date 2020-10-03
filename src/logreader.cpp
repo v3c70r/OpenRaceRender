@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cassert>
 #include <cmath>
+#include <algorithm>
 
 bool operator<(const RaceRecord& thisRec, const RaceRecord& other)
 {

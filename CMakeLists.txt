@@ -56,7 +56,7 @@ add_library(imgui
     thirdparty/imgui/imgui_widgets.cpp
     thirdparty/imgui/imgui_impl_opengl3.cpp
     thirdparty/imgui/imgui_impl_glfw.cpp
-    thirdparty/imgui/filedialog/filedialog.cc
+    thirdparty/imgui/ImFileBrowser/imfilebrowser.cpp
     thirdparty/imgui/imgui_plot/imgui_plot.cpp
     )
 

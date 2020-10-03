@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-class RaceRecord;
+struct RaceRecord;
 class Widget
 {
 public:

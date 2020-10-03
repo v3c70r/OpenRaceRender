@@ -63,6 +63,7 @@ public:
     std::vector<RaceRecord> GetLapRecords(size_t nLap) const;
     
 
+
 private:
     void UpdateTrajectory();
     static std::vector<std::string> SplitString(const std::string& input, char delimiter = ',');

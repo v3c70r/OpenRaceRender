@@ -5,7 +5,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include "filedialog/filedialog.h"
+#include "ImFileBrowser/imfilebrowser.h"
+#include <filesystem>
 #include <stdio.h>
 #include <memory>
 #include <string>
@@ -112,7 +113,6 @@ int main(int argc, char** argv)
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.00f);
 
     /////////////////// Create my stuff
-    PCSX::Widgets::FileDialog fileDialg(GetTitle);
     std::string sLogFile;
     std::string sVideoFile;
     std::unique_ptr<LogReader> pReader = nullptr;
@@ -126,11 +126,15 @@ int main(int argc, char** argv)
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
             pDebugRender = std::make_unique<DebugRender>(*pReader);
+            pRender->RegisterWidget<AccelorationWidget>("Acc");
         }
     }
 
+    ImGui::FileBrowser fileBrowser;
+    fileBrowser.SetTitle("Choose Race Render CSV files");
+    fileBrowser.SetTypeFilters({".csv"});
+
     // Register widgets
-    pRender->RegisterWidget<AccelorationWidget>("Acc");
 
     struct SRecordInfo
     {
@@ -160,21 +164,36 @@ int main(int argc, char** argv)
         ////////////////////////////////
         if (pReader == nullptr) // Show loading screen
         {
-            fileDialg.openDialog();
-            if (fileDialg.draw())
+            
+            fileBrowser.Open();
+            fileBrowser.Display();
+            if (fileBrowser.HasSelected())
             {
-                auto selectedFiles = fileDialg.selected();
-                if (selectedFiles.empty())
-                {
-                    break;
-                }
-                else
-                {
-                    pReader = std::make_unique<LogReader>(selectedFiles[0]);
-                    pRender = std::make_unique<LogRender>(*pReader);
-                    pDebugRender = std::make_unique<DebugRender>(*pReader);
-                }
+                pReader = std::make_unique<LogReader>(fileBrowser.GetSelected().string());
+                pRender = std::make_unique<LogRender>(*pReader);
+                pDebugRender = std::make_unique<DebugRender>(*pReader);
+                pRender->RegisterWidget<AccelorationWidget>("Acc");
+                fileBrowser.ClearSelected();
+                fileBrowser.Close();
             }
+
+            // TODO: file dialog
+            //fileDialg.openDialog();
+            //if (fileDialg.draw())
+            //{
+            //    auto selectedFiles = fileDialg.selected();
+            //    if (selectedFiles.empty())
+            //    {
+            //        break;
+            //    }
+            //    else
+            //    {
+            //        pReader = std::make_unique<LogReader>(selectedFiles[0]);
+            //        pRender = std::make_unique<LogRender>(*pReader);
+            //        pDebugRender = std::make_unique<DebugRender>(*pReader);
+            //    }
+            //}
+
         }
         else
         {

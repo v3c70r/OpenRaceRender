@@ -44,11 +44,11 @@ void LogRender::DrawThrottleBrakeBox()
     //const size_t BRAKE_IDX = 17;
     const size_t THROTTLE_POS_INDEX = 23;
 
-    float progress = rec.values[THROTTLE_POS_INDEX] / 100.0;
+    float progress = rec.values[THROTTLE_POS_INDEX] / 100.0f;
     ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 
     const size_t ENGINE_SPEED_IDX = 21;
-    progress = rec.values[ENGINE_SPEED_IDX] / 9500.0;
+    progress = rec.values[ENGINE_SPEED_IDX] / 9500.0f;
     //sprintf("%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500);
     ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
 }
@@ -66,8 +66,8 @@ void LogRender::DrawMap()
     std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
     for (size_t i = 0; i < normalizedPoints.size() - 1; i += 2)
     {
-        ImVec2 point0(normalizedPoints[i].x * 300.0, normalizedPoints[i].y * 300.0);
-        ImVec2 point1(normalizedPoints[i + 1].x * 300.0, normalizedPoints[i + 1].y * 300.0);
+        ImVec2 point0(normalizedPoints[i].x * 300.0f, normalizedPoints[i].y * 300.0f);
+        ImVec2 point1(normalizedPoints[i + 1].x * 300.0f, normalizedPoints[i + 1].y * 300.0f);
         draw_list->AddLine(
             ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
             ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
@@ -102,8 +102,8 @@ void LogRender::DrawBasicInfoBox()
     {
         const size_t ENGINE_SPEED_IDX = 21;
         char buf[32];
-        std::sprintf(buf, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500.0f);
-        float progress = rec.values[ENGINE_SPEED_IDX] / 9500.0;
+        sprintf_s(buf, 32, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500.0f);
+        float progress = rec.values[ENGINE_SPEED_IDX] / 9500.0f;
 
         ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), buf);
         ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
@@ -113,7 +113,7 @@ void LogRender::DrawBasicInfoBox()
     // Throttle position
     {
         const size_t THROTTLE_POS_INDEX = 23;
-        float progress = rec.values[THROTTLE_POS_INDEX] / 100.0;
+        float progress = rec.values[THROTTLE_POS_INDEX] / 100.0f;
         ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
         ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
         ImGui::Text("Throttle Position");
