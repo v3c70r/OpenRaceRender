@@ -17,3 +17,8 @@ jobs:
       run: cmake --build . --config Release
     - name: test LogReader
       run: ctest -C "Release"
+    - name: upload artifact
+     uses: actions/upload-artifact@v1
+     with:
+       name: OpenRaceRender
+       path: Release\OpenRaceRender.exe
