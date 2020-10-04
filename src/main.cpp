@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <memory>
 #include <string>
-#include "widget.h"
+#include "widgets/accelerationwidget.h"
 
 
 #include "logreader.h"
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
             pDebugRender = std::make_unique<DebugRender>(*pReader);
-            pRender->RegisterWidget<AccelorationWidget>("Acc");
+            pRender->RegisterWidget<AccelerationWidget>("Acc");
         }
     }
 
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
                 pReader = std::make_unique<LogReader>(fileBrowser.GetSelected().string());
                 pRender = std::make_unique<LogRender>(*pReader);
                 pDebugRender = std::make_unique<DebugRender>(*pReader);
-                pRender->RegisterWidget<AccelorationWidget>("Acc");
+                pRender->RegisterWidget<AccelerationWidget>("Acc");
                 fileBrowser.ClearSelected();
                 fileBrowser.Close();
             }

@@ -65,7 +65,8 @@ add_library(gl3w thirdparty/gl3w/src/gl3w.c)
 #add_library(videoplayer src/videoplayer.cpp)
 #target_link_libraries(videoplayer ${FFMPEG_LIBRARIES})
 
-add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/debugrender.cpp src/widget.cpp)
+file(GLOB WIDGETS_SRC src/widgets/*.cpp)
+add_executable(OpenRaceRender src/main.cpp src/logreader.cpp src/logrender.cpp src/debugrender.cpp ${WIDGETS_SRC})
 
 target_link_libraries(OpenRaceRender imgui glfw gl3w)
 #find_package(MPV REQUIRED)
