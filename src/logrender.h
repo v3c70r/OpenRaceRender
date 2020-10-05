@@ -10,7 +10,6 @@ public:
     LogRender(const LogReader& LogReader);
 
 // Draw functions for different boxes
-    void DrawBasicInfoBox();
     float DrawTimeSlider();
 
     void SetPlaying(bool bIsPlaying)
@@ -24,7 +23,6 @@ public:
     }
 
     void DrawRevBox();
-    void DrawThrottleBrakeBox();
     void DrawMap();
 
     bool Update(float dt);
@@ -40,17 +38,20 @@ public:
     }
 
     template<typename T>
-    void RegisterWidget(const std::string& name)
+    void RegisterWidget(const std::string& name, bool bShouldDraw = true)
     {
         m_mpRegisteredWidgets[name] = std::make_unique<T>(name);
+        m_mbShouldDraw[name] = bShouldDraw;
     }
 
     void UnRegisterWidget(const std::string& name)
     {
         m_mpRegisteredWidgets.erase(name);
+        m_mbShouldDraw.erase(name);
     }
 
     void DrawWidgets() const;
+    void DrawWidgetSettings();
     
 
 private:
@@ -59,6 +60,7 @@ private:
     bool m_bIsLooping = false;
     float m_fTime;
     std::map<std::string, std::unique_ptr<Widget>> m_mpRegisteredWidgets;
+    std::map<std::string, bool> m_mbShouldDraw;
 };
 
 

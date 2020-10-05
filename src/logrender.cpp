@@ -1,14 +1,20 @@
 #include "logrender.h"
+
+#include <array>
+#include <cmath>
+#include <cstring>
+
 #include "imgui.h"
 #include "logreader.h"
 #include "widget.h"
-#include <cstring>
-#include <array>
-#include <cmath>
+#include "widgets/accelerationwidget.h"
+#include "widgets/dashboardwidget.h"
 
 LogRender::LogRender(const LogReader& LogReader)
     : m_logReader(LogReader), m_fTime(m_logReader.GetMinTimeStamp())
 {
+    RegisterWidget<AccelerationWidget>("G-force");
+    RegisterWidget<DashboardWidget>("Dashboard");
 }
 
 // Return true if is playing or can continue playing
@@ -38,36 +44,21 @@ bool LogRender::Update(float dt)
     return false;
 }
 
-void LogRender::DrawThrottleBrakeBox()
-{
-    RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
-    //const size_t BRAKE_IDX = 17;
-    const size_t THROTTLE_POS_INDEX = 23;
-
-    float progress = rec.values[THROTTLE_POS_INDEX] / 100.0f;
-    ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
-
-    const size_t ENGINE_SPEED_IDX = 21;
-    progress = rec.values[ENGINE_SPEED_IDX] / 9500.0f;
-    //sprintf("%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500);
-    ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
-}
-
-void DrawLapTime()
-{
-}
+void DrawLapTime() {}
 
 void LogRender::DrawMap()
 {
-
     ImGui::Begin("Map");
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImVec2 canvas_pos = ImGui::GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
+    ImVec2 canvas_pos =
+        ImGui::GetCursorScreenPos();  // ImDrawList API uses screen coordinates!
     std::vector<SVec2> normalizedPoints = m_logReader.GetNormalizedTrajectory();
     for (size_t i = 0; i < normalizedPoints.size() - 1; i += 2)
     {
-        ImVec2 point0(normalizedPoints[i].x * 300.0f, normalizedPoints[i].y * 300.0f);
-        ImVec2 point1(normalizedPoints[i + 1].x * 300.0f, normalizedPoints[i + 1].y * 300.0f);
+        ImVec2 point0(normalizedPoints[i].x * 300.0f,
+                      normalizedPoints[i].y * 300.0f);
+        ImVec2 point1(normalizedPoints[i + 1].x * 300.0f,
+                      normalizedPoints[i + 1].y * 300.0f);
         draw_list->AddLine(
             ImVec2(canvas_pos.x + point0.x, canvas_pos.y + point0.y),
             ImVec2(canvas_pos.x + point1.x, canvas_pos.y + point1.y),
@@ -76,48 +67,14 @@ void LogRender::DrawMap()
     // Plot the position
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
 
-    int nLongitudeIdx = 8;   // x
-    int nLatitudeIdx = 7;    //y
+    int nLongitudeIdx = 8;  // x
+    int nLatitudeIdx = 7;   // y
     SVec2 normalizedPos = m_logReader.GetNormalizedPosition(
         {rec.values[nLongitudeIdx], rec.values[nLatitudeIdx]});
 
     draw_list->AddCircle(ImVec2(canvas_pos.x + normalizedPos.x * 300,
                                 canvas_pos.y + normalizedPos.y * 300),
                          4.0f, 0xFF0000FF, 50, 4.0f);
-    ImGui::End();
-}
-
-
-void LogRender::DrawBasicInfoBox()
-{
-    // ODB and GPS speed
-    RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
-    const size_t ODB_SPEED_INDEX = 22;
-    const size_t GPS_SPEED_INDEX = 11;
-    ImGui::Begin("Speed");
-    ImGui::Text("ODB Speed: %d km/h", int(rec.values[ODB_SPEED_INDEX]));
-    ImGui::Text("GPS Speed: %d km/h", int(rec.values[GPS_SPEED_INDEX]));
-
-    // Engine Rev
-    {
-        const size_t ENGINE_SPEED_IDX = 21;
-        char buf[32];
-        snprintf(buf, 32, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX], 9500.0f);
-        float progress = rec.values[ENGINE_SPEED_IDX] / 9500.0f;
-
-        ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), buf);
-        ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-        ImGui::Text("Engine Speed");
-    }
-
-    // Throttle position
-    {
-        const size_t THROTTLE_POS_INDEX = 23;
-        float progress = rec.values[THROTTLE_POS_INDEX] / 100.0f;
-        ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
-        ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
-        ImGui::Text("Throttle Position");
-    }
     ImGui::End();
 }
 
@@ -151,7 +108,7 @@ float LogRender::DrawTimeSlider()
     }
     ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
     {
-    // Button
+        // Button
         if (m_bIsLooping)
         {
             if (ImGui::Button("Disable Loop"))
@@ -170,8 +127,10 @@ float LogRender::DrawTimeSlider()
 
     ImGui::End();
 
-    if (bIsEdited) return m_fTime;
-    else return -1.0;
+    if (bIsEdited)
+        return m_fTime;
+    else
+        return -1.0;
 };
 
 void LogRender::DrawWidgets() const
@@ -179,7 +138,26 @@ void LogRender::DrawWidgets() const
     RaceRecord rec = m_logReader.GetInterpolatedRecord(m_fTime);
     for (const auto& widgetPair : m_mpRegisteredWidgets)
     {
-        widgetPair.second->Display(rec);
+        if (m_mbShouldDraw.at(widgetPair.first))
+        {
+            widgetPair.second->Display(rec);
+        }
     }
 }
 
+void LogRender::DrawWidgetSettings()
+{
+    if (ImGui::Begin("Widget Settings"))
+    {
+        for (const auto& widgetPair : m_mpRegisteredWidgets)
+        {
+            ImGui::Checkbox("", &m_mbShouldDraw.at(widgetPair.first));
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(widgetPair.first.c_str()))
+            {
+                widgetPair.second->DisplaySettings();
+            }
+        }
+        ImGui::End();
+    }
+}

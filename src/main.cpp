@@ -126,7 +126,6 @@ int main(int argc, char** argv)
             pReader = std::make_unique<LogReader>(sLogFile);
             pRender = std::make_unique<LogRender>(*pReader);
             pDebugRender = std::make_unique<DebugRender>(*pReader);
-            pRender->RegisterWidget<AccelerationWidget>("Acc");
         }
     }
 
@@ -134,7 +133,6 @@ int main(int argc, char** argv)
     fileBrowser.SetTitle("Choose Race Render CSV files");
     fileBrowser.SetTypeFilters({".csv"});
 
-    // Register widgets
 
     struct SRecordInfo
     {
@@ -172,7 +170,6 @@ int main(int argc, char** argv)
                 pReader = std::make_unique<LogReader>(fileBrowser.GetSelected().string());
                 pRender = std::make_unique<LogRender>(*pReader);
                 pDebugRender = std::make_unique<DebugRender>(*pReader);
-                pRender->RegisterWidget<AccelerationWidget>("Acc");
                 fileBrowser.ClearSelected();
                 fileBrowser.Close();
             }
@@ -215,10 +212,10 @@ int main(int argc, char** argv)
                 static float fSeekTime = -1.0;
                 fSeekTime = pRender->DrawTimeSlider();
 
-                pRender->DrawBasicInfoBox();
                 pRender->DrawMap();
 
                 pRender->DrawWidgets();
+                pRender->DrawWidgetSettings();
                 pRender->Update(1.0f / ImGui::GetIO().Framerate);
                 static bool bIsPlaying;
                 bIsPlaying = pRender->IsPlaying();
@@ -255,10 +252,10 @@ int main(int argc, char** argv)
                 }
                 // Render boxes
                 {
-                    pRender->DrawBasicInfoBox();
                     pRender->DrawMap();
                     //pRender->DrawAcceBox();
                     pRender->DrawWidgets();
+                    pRender->DrawWidgetSettings();
                     if(!pRender->Update(1.0f / recordInfo.fFPS))
                     {
                         recordInfo.bIsRecording = false;

@@ -5,6 +5,8 @@ class AccelerationWidget : public Widget
 public:
     AccelerationWidget(const std::string& name);
     void Display(const RaceRecord& rec) const final;
+    void DisplaySettings() final {}
+
 private:
     const float CIRCLE_SIZE = 100.0f;
 };

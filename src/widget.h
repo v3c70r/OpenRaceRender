@@ -16,6 +16,7 @@ public:
     }
     virtual ~Widget(){}
     virtual void Display(const RaceRecord& rec) const = 0;
+    virtual void DisplaySettings() = 0;
 
 protected:
     ImVec2 GetWindowPos() const
