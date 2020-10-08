@@ -38,10 +38,11 @@ public:
     }
 
     template<typename T>
-    void RegisterWidget(const std::string& name, bool bShouldDraw = true)
+    T* RegisterWidget(const std::string& name, bool bShouldDraw = true)
     {
         m_mpRegisteredWidgets[name] = std::make_unique<T>(name);
         m_mbShouldDraw[name] = bShouldDraw;
+        return static_cast<T*>(m_mpRegisteredWidgets.at(name).get());
     }
 
     void UnRegisterWidget(const std::string& name)

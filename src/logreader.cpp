@@ -168,12 +168,13 @@ std::vector<SVec2> LogReader::GetNormalizedTrajectory() const
     }
     return res;
 }
-SVec2 LogReader::GetNormalizedPosition(const SVec2 &pos) const
+
+SVec2 LogReader::GetNormalizedPosition(const SVec2 &pos, const SAABB& aabb)
 {
-    float fXScale = m_boundingBox.upper.x - m_boundingBox.lower.x;
-    float fYScale = m_boundingBox.upper.y - m_boundingBox.lower.y;
+    float fXScale = aabb.upper.x - aabb.lower.x;
+    float fYScale = aabb.upper.y - aabb.lower.y;
     float fScale = std::max(fYScale, fXScale);
-    return SVec2(pos - m_boundingBox.lower)/fScale ;
+    return SVec2(pos - aabb.lower)/fScale ;
 }
 
 std::vector<RaceRecord> LogReader::GetLapRecords(size_t nLap) const
@@ -266,6 +267,7 @@ std::vector<float> LogReader::SplitFloats(const std::string& input,
     }
     return res;
 }
+
 
 //////////////////////////
 

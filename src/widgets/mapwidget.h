@@ -1,6 +1,6 @@
 #pragma once
 #include "../widget.h"
-#include "../logreader.h"
+#include "../basictypes.h"
 #include <vector>
 
 class MapWidget : public Widget
@@ -13,6 +13,9 @@ public:
     }
     void Display(const RaceRecord& rec) const final;
     void DisplaySettings() final;
+    void SetBoundingBox(const SAABB& boundingBox);
+    void SetTrajectory(const std::vector<SVec2> &vTrajectory);
 private:
     std::vector<SVec2> m_vMapTrajectory;
+    SAABB m_boundingBox;
 };

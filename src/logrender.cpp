@@ -11,12 +11,14 @@
 #include "widgets/dashboardwidget.h"
 #include "widgets/mapwidget.h"
 
-LogRender::LogRender(const LogReader& LogReader)
-    : m_logReader(LogReader), m_fTime(m_logReader.GetMinTimeStamp())
+LogRender::LogRender(const LogReader& logReader)
+    : m_logReader(logReader), m_fTime(m_logReader.GetMinTimeStamp())
 {
     RegisterWidget<AccelerationWidget>("G-force");
     RegisterWidget<DashboardWidget>("Dashboard");
-    RegisterWidget<MapWidget>("MapWidget");
+    MapWidget* pMapWidget = RegisterWidget<MapWidget>("MapWidget");
+    pMapWidget->SetBoundingBox(logReader.GetAABB());
+    pMapWidget->SetTrajectory(logReader.GetNormalizedTrajectory());
 }
 
 // Return true if is playing or can continue playing
@@ -71,8 +73,9 @@ void LogRender::DrawMap()
 
     int nLongitudeIdx = 8;  // x
     int nLatitudeIdx = 7;   // y
-    SVec2 normalizedPos = m_logReader.GetNormalizedPosition(
-        {rec.values[nLongitudeIdx], rec.values[nLatitudeIdx]});
+    SVec2 normalizedPos = LogReader::GetNormalizedPosition(
+        {rec.values[nLongitudeIdx], rec.values[nLatitudeIdx]},
+        m_logReader.GetAABB());
 
     draw_list->AddCircle(ImVec2(canvas_pos.x + normalizedPos.x * 300,
                                 canvas_pos.y + normalizedPos.y * 300),

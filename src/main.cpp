@@ -212,7 +212,7 @@ int main(int argc, char** argv)
                 static float fSeekTime = -1.0;
                 fSeekTime = pRender->DrawTimeSlider();
 
-                pRender->DrawMap();
+                //pRender->DrawMap();
 
                 pRender->DrawWidgets();
                 pRender->DrawWidgetSettings();
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
                 }
                 // Render boxes
                 {
-                    pRender->DrawMap();
+                    //pRender->DrawMap();
                     //pRender->DrawAcceBox();
                     pRender->DrawWidgets();
                     pRender->DrawWidgetSettings();
