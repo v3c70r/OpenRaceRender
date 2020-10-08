@@ -9,12 +9,14 @@
 #include "widget.h"
 #include "widgets/accelerationwidget.h"
 #include "widgets/dashboardwidget.h"
+#include "widgets/mapwidget.h"
 
 LogRender::LogRender(const LogReader& LogReader)
     : m_logReader(LogReader), m_fTime(m_logReader.GetMinTimeStamp())
 {
     RegisterWidget<AccelerationWidget>("G-force");
     RegisterWidget<DashboardWidget>("Dashboard");
+    RegisterWidget<MapWidget>("MapWidget");
 }
 
 // Return true if is playing or can continue playing
@@ -151,7 +153,7 @@ void LogRender::DrawWidgetSettings()
     {
         for (const auto& widgetPair : m_mpRegisteredWidgets)
         {
-            ImGui::Checkbox("", &m_mbShouldDraw.at(widgetPair.first));
+            ImGui::Checkbox((std::string("##")+widgetPair.first).c_str(), &m_mbShouldDraw.at(widgetPair.first));
             ImGui::SameLine();
             if (ImGui::CollapsingHeader(widgetPair.first.c_str()))
             {

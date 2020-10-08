@@ -45,5 +45,6 @@ void DashboardWidget::Display(const RaceRecord& rec) const
 
 void DashboardWidget::DisplaySettings()
 {
-    ImGui::InputFloat("Max RPM", &m_fMaxRPM);
+    ImGui::SliderFloat("##MaxRPM", &m_fMaxRPM, 0.0f, 10000.0f, "MAX %.0f");
+    ImGui::SliderFloat("##RedlineRPM", &m_fRedlineRPM, 0.0f, 10000.0f, "REDLINE %.0f");
 }

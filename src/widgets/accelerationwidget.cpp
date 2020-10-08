@@ -1,5 +1,4 @@
 #include "accelerationwidget.h"
-
 #include "logreader.h"
 
 AccelerationWidget::AccelerationWidget(const std::string& name)
@@ -27,6 +26,7 @@ void AccelerationWidget::Display(const RaceRecord& rec) const
         y += 40;
 
         draw_list->AddCircle(ImVec2(x, y), CIRCLE_SIZE, 0xFFFFFFFF, 50, 1.0f);
+        draw_list->AddCircle(ImVec2(x, y), 2 * CIRCLE_SIZE, 0xFFFFFFFF, 50, 1.0f);
         draw_list->AddCircle(ImVec2(x + CIRCLE_SIZE * fAccY, y - CIRCLE_SIZE * fAccX), 3.0f,
                              0XFF0000FF, 10, 3.0f);
 

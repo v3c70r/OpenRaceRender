@@ -10,4 +10,5 @@ public:
     void DisplaySettings() final;
 private:
     float m_fMaxRPM = 6000.0f;
+    float m_fRedlineRPM = 5000.0f;
 };
