@@ -18,4 +18,7 @@ public:
 private:
     std::vector<SVec2> m_vMapTrajectory;
     SAABB m_boundingBox;
+    float m_fSize = 200.0f;
+    SVec2 m_vOffset = {0.0f, 0.0f};
+    bool m_bFollow = false;
 };
