@@ -11,8 +11,6 @@ void DashboardWidget::Display(const RaceRecord& rec) const
 {
     ImGui::SetNextWindowSize(m_vWindowSize);
     ImGui::SetNextWindowPos(GetWindowPos());
-    const size_t ODB_SPEED_INDEX = 22;
-    const size_t GPS_SPEED_INDEX = 11;
     if (ImGui::Begin("Dashboard", nullptr, m_nWindowFlags))
     {
         ImGui::Text("ODB Speed: %d km/h", int(rec.values[ODB_SPEED_INDEX]));
@@ -20,7 +18,6 @@ void DashboardWidget::Display(const RaceRecord& rec) const
 
         // Engine Rev
         {
-            const size_t ENGINE_SPEED_IDX = 21;
             char buf[32];
             snprintf(buf, 32, "%.0f/%.0f", rec.values[ENGINE_SPEED_IDX],
                      m_fMaxRPM);
@@ -42,6 +39,7 @@ void DashboardWidget::Display(const RaceRecord& rec) const
         ImGui::End();
     }
 }
+
 
 void DashboardWidget::DisplaySettings()
 {

@@ -22,9 +22,6 @@ public:
         m_bIsLooping = bIsLooping;
     }
 
-    void DrawRevBox();
-    void DrawMap();
-
     bool Update(float dt);
     
 

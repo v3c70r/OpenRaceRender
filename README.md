@@ -1,14 +1,13 @@
 # OpenRaceRender
 
-Open Race Render is a tool to render [TrackAddict](http://racerender.com/TrackAddict/Features.html) data overlay on video. 
+![MacOS](https://github.com/v3c70r/OpenRaceRender/workflows/MacOS/badge.svg?branch=master)|  ![Windows](https://github.com/v3c70r/OpenRaceRender/workflows/Windows/badge.svg)|![Linux](https://github.com/v3c70r/OpenRaceRender/workflows/Linux/badge.svg)
+Open Race Render is a tool to render [TrackAddict](http://racerender.com/TrackAddict/Features.html) data overlay. It can export the overlay as PNG file sequence. 
 It is similar to [RaceRender](http://racerender.com/RR3/Features.html) but with limited functionalities.
-
-*Video output is NOT supported for now*
 
 ## Run
 
 ```
-OpenRaceRender <LogFile> <VideoFile>
+OpenRaceRender <LogFile>
 ```
 A file dialog will pop up at launch if LogFile is not provided.
 
@@ -33,7 +32,5 @@ See [screenshot](https://github.com/v3c70r/OpenRaceRender/raw/master/screen.png)
 
 ## Dependencies
 
-* libmpv
 * ImGui
 * std::filesystem from C++17
-
